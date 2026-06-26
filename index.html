@@ -265,7 +265,7 @@
       d.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
           <div class="voltar" style="margin:0" onclick="estado.sel=null;render()">← Voltar para a lista</div>
-          <button onclick="trocarAba('impressao')" style="padding:7px 16px;background:var(--azul);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Imprimir</button>
+          <button onclick="trocarAba('impressao')" style="padding:7px 16px;background:var(--azul);color:var(--vale-white);border:none;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Imprimir</button>
         </div>
 
         <!-- Cabeçalho do pacote -->
@@ -469,11 +469,11 @@
       const p = estado.sel;
       if (!p) {
         d.innerHTML = `
-          <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;">
+          <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--vale-white);text-align:center;">
             <div style="font-size:52px;margin-bottom:16px;opacity:.8;">🖨️</div>
             <h2 style="margin-bottom:8px;">Nenhum pacote selecionado</h2>
             <p>Selecione um pacote na aba <b>Pacotes</b> antes de imprimir.</p>
-            <button onclick="trocarAba('pacotes')" style="margin-top:20px;padding:10px 24px;background:#fff;color:var(--texto);border:none;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;">← Ir para Pacotes</button>
+            <button onclick="trocarAba('pacotes')" style="margin-top:20px;padding:10px 24px;background:var(--vale-white);color:var(--texto);border:none;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;">← Ir para Pacotes</button>
           </div>`;
         return;
       }
@@ -485,7 +485,7 @@
         <div class="imp-controles">
           <button class="imp-btn-voltar" onclick="trocarAba('pacotes')">← Voltar</button>
           <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-size:12.5px;color:#fff;margin-right:4px;">Orientação:</span>
+            <span style="font-size:12.5px;color:var(--vale-white);margin-right:4px;">Orientação:</span>
             <button class="imp-btn-orient ${estado.orientacao==='retrato'?'ativo':''}" onclick="mudarOrientacao('retrato')">📄 Retrato</button>
             <button class="imp-btn-orient ${estado.orientacao==='paisagem'?'ativo':''}" onclick="mudarOrientacao('paisagem')">🏞️ Paisagem</button>
           </div>
@@ -527,10 +527,10 @@
     }
 
     /* =======================================================================
-       CARREGAMENTO DO CSV
+       CARREGAMENTO DO PARQUET
        ======================================================================= */
 
-    // Exibe o seletor de arquivo manual como fallback.
+    // Exibe seletor manual de arquivo .parquet como fallback.
     function mostrarCarregador() {
       document.getElementById('lista').innerHTML = '';
       document.getElementById('paginacao').innerHTML = '';
@@ -539,31 +539,27 @@
         <div class="vazio">
           <div class="big">📂</div>
           <h2>Base de dados não encontrada</h2>
-          <p>Não foi possível carregar automaticamente.<br>Selecione o arquivo <strong>Lista de Imagens.csv</strong> manualmente.</p>
-          <label style="display:inline-block;margin-top:24px;padding:12px 28px;background:var(--azul);color:#fff;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;">
-            📂 Selecionar CSV
-            <input type="file" accept=".csv" onchange="carregarCSV(this.files[0])" style="display:none">
+          <p>Não foi possível carregar <strong>data/imagens_base64.parquet</strong> automaticamente.<br>
+          Selecione o arquivo manualmente para continuar.</p>
+          <label style="display:inline-block;margin-top:24px;padding:12px 28px;background:var(--azul);color:var(--vale-white);border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;">
+            📂 Selecionar Parquet
+            <input type="file" accept=".parquet" onchange="carregarParquetManual(this.files[0])" style="display:none">
           </label>
         </div>`;
     }
 
-    // Parseia o texto do CSV, constrói PACOTES e inicializa a aplicação.
-    async function processarTextoCSV(texto) {
-      const mapa  = new Map();
-      const linhas = texto.replace(/^﻿/, '').split('\n');
+    // Constrói PACOTES a partir das linhas do parquet e inicializa a aplicação.
+    function processarLinhasParquet(rows) {
+      if (!rows || !rows.length) { mostrarCarregador(); return; }
 
-      for (let i = 1; i < linhas.length; i++) {
-        const linha = linhas[i].replace(/\r$/, '');
-        if (!linha) continue;
+      const mapa = new Map();
 
-        const p1 = linha.indexOf(',');
-        const p2 = linha.indexOf(',', p1 + 1);
-        const p3 = linha.indexOf(',', p2 + 1);
-        if (p1 < 0 || p2 < 0 || p3 < 0) continue;
+      for (const row of rows) {
+        const iwpFull = String(row['IWP']      ?? '');
+        const mime    = String(row['MimeType'] ?? '');
+        const pic     = String(row['Pic']      ?? '');
 
-        const iwpFull = linha.substring(p1 + 1, p2);
-        const mime    = linha.substring(p2 + 1, p3);
-        const pic     = linha.substring(p3 + 1);
+        if (!iwpFull || !mime || !pic) continue;
 
         const sep = iwpFull.lastIndexOf(' - ');
         if (sep === -1) continue;
@@ -601,34 +597,57 @@
       render();
     }
 
-    // Carregamento via upload manual (fallback).
-    async function carregarCSV(arquivo) {
+    // Lê um ArrayBuffer e executa a leitura do parquet (suporte a GZIP via hyparquet-compressors).
+    async function lerParquetDeBuffer(buffer) {
+      const [{ parquetRead }, { compressors }] = await Promise.all([
+        import('https://cdn.jsdelivr.net/npm/hyparquet/+esm'),
+        import('https://cdn.jsdelivr.net/npm/hyparquet-compressors/+esm')
+      ]);
+      const asyncBuffer = {
+        byteLength: buffer.byteLength,
+        slice: async (start, end) => buffer.slice(start, end)
+      };
+      await parquetRead({
+        file: asyncBuffer,
+        compressors,
+        rowFormat: 'object',
+        onComplete: processarLinhasParquet
+      });
+    }
+
+    // Carregamento via seleção manual de arquivo (fallback para file://).
+    async function carregarParquetManual(arquivo) {
       document.getElementById('detalhe').innerHTML = `
         <div class="vazio">
           <div class="big">⏳</div>
           <h2>Processando...</h2>
-          <p>Indexando as imagens do CSV. Aguarde.</p>
+          <p>Lendo o arquivo parquet. Aguarde.</p>
         </div>`;
-      await new Promise(r => setTimeout(r, 60));
-      const texto = await arquivo.text();
-      await processarTextoCSV(texto);
+      try {
+        const buffer = await arquivo.arrayBuffer();
+        await lerParquetDeBuffer(buffer);
+      } catch (e) {
+        console.error('Erro ao ler parquet manual:', e);
+        mostrarCarregador();
+      }
     }
 
-    // Inicialização: busca o CSV do repositório automaticamente.
+    // Inicialização: faz fetch do parquet e carrega como ArrayBuffer.
     async function inicializar() {
       document.getElementById('contagem').textContent = 'Carregando...';
       document.getElementById('detalhe').innerHTML = `
         <div class="vazio">
           <div class="big">⏳</div>
           <h2>Carregando base de dados...</h2>
-          <p>Buscando <strong>Lista de Imagens.csv</strong> do repositório.</p>
+          <p>Lendo <strong>data/imagens_base64.parquet</strong>...</p>
         </div>`;
       try {
-        const resp = await fetch('Lista de Imagens.csv');
+        const resp = await fetch('data/imagens_base64.parquet');
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const texto = await resp.text();
-        await processarTextoCSV(texto);
-      } catch (_) {
+        const buffer = await resp.arrayBuffer();
+        await lerParquetDeBuffer(buffer);
+      } catch (e) {
+        console.error('Erro ao carregar parquet:', e);
         mostrarCarregador();
       }
     }
