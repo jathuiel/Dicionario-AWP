@@ -1,21 +1,37 @@
     /* =========================================================================
-       VARIÁVEIS DE TEMA
-       Centraliza as cores do projeto. Alterar aqui reflete em toda a interface.
+       TOKENS DE DESIGN — IDENTIDADE VISUAL VALE
+       Baseado no Guia Rápido da Marca Vale. Ver VALE-DESIGN-SYSTEM.md.
        ========================================================================= */
     :root {
-      --azul-escuro: #0b1f3a;   /* fundo da sidebar */
-      --azul:        #1e4fd6;   /* cor de destaque / ações */
-      --azul-claro:  #eaf0fe;   /* realce de itens selecionados */
+      /* --- Cores primárias Vale --- */
+      --vale-green:        #00807C;   /* Verde Vale — cor primária da marca */
+      --vale-green-dark:   #006661;   /* Verde escuro — sidebar, hover */
+      --vale-green-light:  #E0F4F3;   /* Verde claro — fundos de destaque */
 
-      --cinza-bg:    #f4f6fb;   /* fundo geral da aplicação */
-      --cinza-borda: #e2e7f0;   /* bordas e divisórias */
+      /* --- Cores secundárias Vale --- */
+      --vale-yellow:       #EEA722;   /* Amarelo Vale — destaque e seleção */
+      --vale-yellow-light: #FDF3D9;   /* Amarelo claro — fundo de badge */
 
-      --texto:       #1c2430;   /* texto principal */
-      --texto-sec:   #6b7686;   /* texto secundário / labels */
+      /* --- Neutros Vale --- */
+      --vale-gray:         #77787B;   /* Cinza Vale — texto secundário */
+      --vale-gray-light:   #F4F6F8;   /* Cinza claro — fundo geral */
+      --vale-gray-border:  #E2E7F0;   /* Cinza borda — divisórias */
+      --vale-black:        #1A1A1A;   /* Texto principal */
+      --vale-white:        #FFFFFF;
 
+      /* --- Aliases semânticos (compatibilidade com o CSS existente) --- */
+      --azul-escuro: var(--vale-green-dark);
+      --azul:        var(--vale-green);
+      --azul-claro:  var(--vale-yellow);
+      --cinza-bg:    var(--vale-gray-light);
+      --cinza-borda: var(--vale-gray-border);
+      --texto:       var(--vale-black);
+      --texto-sec:   var(--vale-gray);
+
+      /* --- Status (convenção interna da equipe — não alterados) --- */
       --verde:       #16a34a;  --verde-bg:  #dcfce7;   /* status "Ativo" */
-      --amarelo:     #b45309;  --amarelo-bg:#fef3c7;   /* avisos (reservado) */
-      --roxo:        #6d28d9;  --roxo-bg:   #ede9fe;   /* destaque (reservado) */
+      --amarelo:     #b45309;  --amarelo-bg:#fef3c7;   /* avisos */
+      --roxo:        #6d28d9;  --roxo-bg:   #ede9fe;   /* destaque reservado */
     }
 
     /* =========================================================================
@@ -28,7 +44,7 @@
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       background: var(--cinza-bg);
       color: var(--texto);
       display: flex;          /* layout em 3 colunas: sidebar | lista | detalhe */
@@ -57,7 +73,7 @@
     .sidebar .logo .ico {
       width: 38px;
       height: 38px;
-      border: 2px solid #4a7bff;
+      border: 2px solid rgba(255,255,255,.25);
       border-radius: 9px;
       display: flex;
       align-items: center;
@@ -75,7 +91,7 @@
       align-items: center;
       gap: 14px;
       padding: 13px 22px;
-      color: #aebbd4;
+      color: rgba(255,255,255,.6);
       text-decoration: none;
       font-size: 14.5px;
       border-left: 3px solid transparent;
@@ -83,10 +99,10 @@
     .nav a.ativo {
       background: var(--azul);
       color: #fff;
-      border-left-color: #9bb6ff;
+      border-left-color: var(--vale-yellow);
     }
     .nav a:hover:not(.ativo) {
-      background: #13294d;
+      background: rgba(0,0,0,.18);
       color: #fff;
     }
     .nav .ico {
@@ -98,7 +114,7 @@
     .sidebar .rodape {
       margin-top: auto;
       padding: 18px 22px;
-      color: #8092b3;
+      color: rgba(255,255,255,.4);
       font-size: 13px;
       display: flex;
       align-items: center;
@@ -228,7 +244,7 @@
     }
     .card.sel {
       background: var(--azul-claro);
-      border-color: #bcd0ff;
+      border-color: var(--vale-yellow);
     }
     .card .cod {
       font-size: 13.5px;
@@ -630,7 +646,7 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2px solid #0b1f3a;
+      border-bottom: 2px solid var(--vale-green);
       padding-bottom: 10px;
       margin-bottom: 16px;
     }
@@ -650,7 +666,7 @@
     }
     .imp-info td:first-child {
       width: 35%;
-      background: #f4f6fb;
+      background: var(--vale-gray-light);
       font-weight: 600;
       color: #6b7686;
     }
