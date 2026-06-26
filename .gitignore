@@ -1,0 +1,8 @@
+# Arquivo de dados bruto (98 MB — não versionar)
+Lista de Imagens.csv
+
+# Backups gerados localmente
+*.bak
+
+# Diretórios de ferramentas locais
+.claude/
