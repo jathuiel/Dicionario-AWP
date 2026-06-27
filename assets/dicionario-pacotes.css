@@ -73,7 +73,7 @@
     .sidebar .logo .ico {
       width: 128px;
       height: 128px;
-      border: 0px solid var(--verde-green);
+      border: none;
       border-radius: 9px;
       display: flex;
       align-items: center;
@@ -743,6 +743,7 @@
       }
       .sidebar .logo b  { display: none; }
       .sidebar .rodape  { display: none; }
+      .sidebar .logo .ico { width: 36px; height: 36px; }
       .nav a {
         justify-content: center;
         padding: 26px 0;

@@ -24,7 +24,7 @@
   <aside class="sidebar">
     <div class="logo">
       <div class="ico">
-        <img src="assets/simbolo_verum_branco.png" alt=" Vale"></div>
+        <img src="assets/simbolo_verum_branco.png" alt="Vale"></div>
       <b>Dicionário de Pacotes<br>AWP</b>
     </div>
     <nav class="nav">
@@ -288,7 +288,7 @@
       // Vistas do pacote no formato [[nome, arquivo], ...] e qual está ativa.
       const vistas = Object.entries(p.views);
       if (!vistas.length) {
-        d.innerHTML = `<div class="vazio"><div class="big">▦</div><h2>Sem vistas disponíveis</h2><p>Este pacote não possui imagens cadastradas.</p></div>`;
+        d.innerHTML = `<div class="vazio"><div class="big">📦</div><h2>Sem vistas disponíveis</h2><p>Este pacote não possui imagens cadastradas.</p></div>`;
         return;
       }
       const vAtiva = Math.min(estado.vista || 0, vistas.length - 1);
@@ -333,7 +333,7 @@
             <!-- Visualizador da vista ativa -->
             <div class="visualizador">
               <button class="nav-vista esq" onclick="trocaVista(-1)">‹</button>
-              <img id="det-img" src="${vArq}" onclick="abreLightbox(${vAtiva})" alt="${vNome}">
+              <img id="det-img" src="${cssEsc(vArq)}" onclick="abreLightbox(${vAtiva})" alt="${vNome}">
               <button class="nav-vista dir" onclick="trocaVista(1)">›</button>
               <span class="vista-label" id="det-vista-label">${vNome}</span>
             </div>
@@ -377,7 +377,7 @@
       const [vNome, vArq] = vistas[vAtiva];
 
       const img = document.getElementById('det-img');
-      if (img) { img.src = vArq; img.alt = vNome; img.onclick = () => abreLightbox(vAtiva); }
+      if (img) { img.src = cssEsc(vArq); img.alt = vNome; img.onclick = () => abreLightbox(vAtiva); }
 
       const get = id => document.getElementById(id);
       if (get('det-vista-label'))      get('det-vista-label').textContent       = vNome;
@@ -549,7 +549,7 @@
           <div class="imp-galeria">
             ${vistas.map(([nome, src]) => `
               <div class="imp-vista">
-                <img src="${src}" alt="${nome}">
+                <img src="${cssEsc(src)}" alt="${nome}">
                 <div class="imp-cap">${nome}</div>
               </div>`).join('')}
           </div>
