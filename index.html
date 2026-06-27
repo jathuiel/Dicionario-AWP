@@ -10,6 +10,12 @@
 
 <body>
 
+  <!-- Cabeçalho mobile (oculto em telas maiores) -->
+  <header class="header-mobile">
+    <div class="ico">◧</div>
+    <b>DICIONÁRIO AWP BIM</b>
+  </header>
+
   <!-- ===================================================================== -->
   <!-- SIDEBAR                                                               -->
   <!-- ===================================================================== -->
@@ -39,22 +45,29 @@
     </div>
 
     <!-- Filtros (preenchidos dinamicamente via JS) -->
-    <div class="filtros">
+    <div class="filtros" id="filtros-bloco">
       <div class="cab">
-        <b>FILTROS</b>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <b>FILTROS</b>
+          <span class="filtro-toggle" id="filtro-toggle" onclick="toggleFiltros()" title="Recolher filtros">
+            <i class="chevron">▾</i>
+          </span>
+        </div>
         <span id="limpar">Limpar ⇄</span>
       </div>
-      <div class="campo">
-        <label>Área</label>
-        <select id="f-area"><option value="">Todas</option></select>
-      </div>
-      <div class="campo">
-        <label>CWP</label>
-        <select id="f-cwp"><option value="">Todos</option></select>
-      </div>
-      <div class="campo">
-        <label>Disciplina</label>
-        <select id="f-disc"><option value="">Todas</option></select>
+      <div class="filtros-campos" id="filtros-campos">
+        <div class="campo">
+          <label>Área</label>
+          <select id="f-area"><option value="">Todas</option></select>
+        </div>
+        <div class="campo">
+          <label>CWP</label>
+          <select id="f-cwp"><option value="">Todos</option></select>
+        </div>
+        <div class="campo">
+          <label>Disciplina</label>
+          <select id="f-disc"><option value="">Todas</option></select>
+        </div>
       </div>
     </div>
 
@@ -88,6 +101,18 @@
     <span class="lb-nav dir" id="lb-dir">›</span>
     <span class="lb-cap" id="lb-cap"></span>
   </div>
+
+  <!-- Navegação inferior mobile (oculta em telas maiores) -->
+  <nav class="nav-bottom">
+    <a href="#" id="nav-bottom-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;">
+      <span class="ico">▦</span>
+      <small>Pacotes</small>
+    </a>
+    <a href="#" id="nav-bottom-impressao" onclick="trocarAba('impressao');return false;">
+      <span class="ico">🖨️</span>
+      <small>Imprimir</small>
+    </a>
+  </nav>
 
   <script>
     /* =======================================================================
@@ -233,6 +258,10 @@
       pgEl.appendChild(btn('›', estado.pagina + 1, estado.pagina >= paginas));
 
       renderDetalhe();
+
+      // Sincroniza data-sel para controle do painel deslizante no mobile
+      if (estado.sel) document.body.setAttribute('data-sel', 'true');
+      else document.body.removeAttribute('data-sel');
     }
 
     /* =======================================================================
@@ -445,6 +474,9 @@
       document.body.dataset.aba = aba;
       document.querySelectorAll('.nav a').forEach(a => a.classList.remove('ativo'));
       document.getElementById('nav-' + aba).classList.add('ativo');
+      document.querySelectorAll('.nav-bottom a').forEach(a => a.classList.remove('ativo'));
+      const navB = document.getElementById('nav-bottom-' + aba);
+      if (navB) navB.classList.add('ativo');
       if (aba === 'impressao') renderImpressao();
     }
 
@@ -651,6 +683,58 @@
         mostrarCarregador();
       }
     }
+
+    /* =======================================================================
+       FASE 02 — FILTROS RECOLHÍVEIS
+       ======================================================================= */
+
+    function toggleFiltros() {
+      document.getElementById('filtros-bloco').classList.toggle('filtros--recolhido');
+    }
+
+    /* =======================================================================
+       FASE 02 — GESTOS DE SWIPE (touch-first, passive listeners)
+       ======================================================================= */
+    (function initSwipes() {
+      let t0x = 0, t0y = 0, alvo = null;
+
+      const det = document.querySelector('.detalhe');
+      const lb  = document.getElementById('lightbox');
+
+      function onStart(e) {
+        t0x  = e.touches[0].clientX;
+        t0y  = e.touches[0].clientY;
+        // Define o alvo do gesto pela origem do toque
+        if (e.target.closest('.visualizador'))    alvo = 'vis';
+        else if (e.currentTarget === lb)          alvo = 'lb';
+        else if (t0x < 48)                        alvo = 'back'; // borda esquerda → voltar
+        else                                       alvo = null;
+      }
+
+      function onEnd(e) {
+        const dx = e.changedTouches[0].clientX - t0x;
+        const dy = Math.abs(e.changedTouches[0].clientY - t0y);
+        // Ignora gestos mais verticais do que horizontais
+        if (dy > Math.abs(dx) * 1.2 || Math.abs(dx) < 40) return;
+
+        switch (alvo) {
+          case 'back':
+            if (dx > 0 && estado.sel) { estado.sel = null; render(); }
+            break;
+          case 'vis':
+            trocaVista(dx < 0 ? 1 : -1);
+            break;
+          case 'lb':
+            navLb(dx < 0 ? 1 : -1);
+            break;
+        }
+      }
+
+      det.addEventListener('touchstart', onStart, { passive: true });
+      det.addEventListener('touchend',   onEnd,   { passive: true });
+      lb.addEventListener('touchstart',  onStart, { passive: true });
+      lb.addEventListener('touchend',    onEnd,   { passive: true });
+    })();
 
     inicializar();
   </script>

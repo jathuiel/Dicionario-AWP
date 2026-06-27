@@ -715,6 +715,244 @@
     }
 
     /* =========================================================================
+       ELEMENTOS EXCLUSIVOS DO MOBILE (ocultos em desktop por padrão)
+       ========================================================================= */
+    .header-mobile { display: none; }
+    .nav-bottom    { display: none; }
+
+    /* =========================================================================
+       TABLET (768px – 1023px) — sidebar recolhida a ícones
+       ========================================================================= */
+    @media (max-width: 1023px) and (min-width: 768px) {
+      .sidebar {
+        width: 60px;
+        overflow: hidden;
+      }
+      .sidebar .logo {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .sidebar .logo b  { display: none; }
+      .sidebar .rodape  { display: none; }
+      .nav a {
+        justify-content: center;
+        padding: 13px 0;
+        gap: 0;
+        font-size: 0;        /* oculta texto, mantém ícone */
+      }
+      .nav a .ico { font-size: 18px; }
+      .coluna-lista { width: 300px; }
+    }
+
+    /* =========================================================================
+       MOBILE (< 768px) — layout em pilha, um painel por vez
+       ========================================================================= */
+    @media (max-width: 767px) {
+      body {
+        flex-direction: column;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      /* ---- Cabeçalho mobile ---- */
+      .header-mobile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        height: 52px;
+        flex-shrink: 0;
+        background: var(--azul-escuro);
+        color: var(--vale-white);
+        z-index: 10;
+      }
+      .header-mobile .ico {
+        width: 32px;
+        height: 32px;
+        border: 2px solid rgba(255,255,255,.25);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+      }
+      .header-mobile b { font-size: 14px; }
+
+      /* ---- Sidebar: oculta ---- */
+      .sidebar { display: none; }
+
+      /* ---- Lista: largura total, com espaço para nav inferior ---- */
+      .coluna-lista {
+        width: 100%;
+        flex: 1;
+        overflow: hidden;
+        padding-bottom: 58px;
+      }
+
+      /* ---- Painel de detalhe: desliza da direita ---- */
+      .detalhe {
+        position: fixed;
+        top: 52px;
+        left: 0;
+        right: 0;
+        bottom: 58px;
+        z-index: 20;
+        background: var(--cinza-bg);
+        padding: 14px;
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform .3s ease;
+      }
+      body[data-sel] .detalhe                   { transform: translateX(0); }
+      body[data-aba="impressao"] .detalhe        { transform: translateX(100%); }
+
+      /* ---- Área de impressão: espaço para nav inferior ---- */
+      .area-impressao {
+        padding: 16px 16px 74px;
+      }
+      .imp-controles {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+      }
+      .imp-pagina {
+        width: 100%;
+        min-height: unset;
+        padding: 12px;
+        font-size: 12px;
+      }
+      .imp-pagina--paisagem {
+        width: 100%;
+        min-height: unset;
+      }
+      .imp-galeria,
+      .imp-pagina--paisagem .imp-galeria { grid-template-columns: 1fr; }
+
+      /* ---- Navegação inferior ---- */
+      .nav-bottom {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 58px;
+        z-index: 30;
+        background: var(--azul-escuro);
+        border-top: 1px solid rgba(255,255,255,.12);
+      }
+      .nav-bottom a {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        color: rgba(255,255,255,.5);
+        text-decoration: none;
+        font-size: 10px;
+        border-top: 2px solid transparent;
+      }
+      .nav-bottom a .ico { font-size: 18px; line-height: 1; }
+      .nav-bottom a.ativo {
+        color: var(--vale-white);
+        border-top-color: var(--vale-yellow);
+      }
+
+      /* ---- Ajustes de conteúdo no detalhe ---- */
+      .det-cab { flex-direction: column; gap: 10px; }
+      .det-cab h1  { font-size: 20px; }
+      .det-cab .sub { font-size: 13px; }
+      .grid        { grid-template-columns: 1fr; }
+      .vistas-grid { grid-template-columns: repeat(2, 1fr); }
+
+      /* ---- Filtros: campos em coluna ---- */
+      .campo { flex-direction: column; align-items: stretch; gap: 5px; }
+      .campo label  { min-width: unset; }
+      .campo select { width: 100%; }
+    }
+
+    /* =========================================================================
+       FASE 02 — Safe area, touch targets, gestos e micro-interações
+       ========================================================================= */
+
+    /* Safe area insets — iOS com notch, Dynamic Island e home bar */
+    @supports (padding: env(safe-area-inset-bottom)) {
+      @media (max-width: 767px) {
+        .nav-bottom {
+          height: calc(58px + env(safe-area-inset-bottom));
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        .coluna-lista   { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
+        .detalhe        { bottom: calc(58px + env(safe-area-inset-bottom)); }
+        .area-impressao { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+        .header-mobile  { padding-top: env(safe-area-inset-top); height: calc(52px + env(safe-area-inset-top)); }
+        .detalhe        { top: calc(52px + env(safe-area-inset-top)); }
+      }
+    }
+
+    @media (max-width: 767px) {
+
+      /* ---- Touch targets mínimos 44px (Fitts' Law) ---- */
+      .card             { min-height: 64px; }
+      .paginacao button { min-width: 44px; height: 44px; font-size: 14px; }
+      .nav-bottom a     { min-height: 44px; }
+      .voltar           { min-height: 44px; align-items: center; }
+
+      /* font-size 16px em inputs: previne zoom automático no iOS */
+      .busca input,
+      .campo select     { font-size: 16px; }
+
+      /* ---- Feedback visual no toque (sem hover no mobile) ---- */
+      .card:active {
+        background: var(--vale-green-light);
+        transform: scale(0.985);
+        transition: transform .1s ease, background .1s ease;
+      }
+      .nav-bottom a:active { opacity: .65; }
+      .paginacao button:active:not(:disabled) { background: var(--cinza-bg); }
+
+      /* ---- Filtros recolhíveis ---- */
+      .filtros-campos {
+        overflow: hidden;
+        max-height: 500px;
+        transition: max-height .3s ease;
+      }
+      .filtros--recolhido .filtros-campos { max-height: 0; }
+
+      .filtro-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        min-height: 32px;
+        color: var(--azul);
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        font-style: normal;
+      }
+      .filtro-toggle .chevron {
+        display: inline-block;
+        font-size: 14px;
+        transition: transform .25s ease;
+      }
+      .filtros--recolhido .filtro-toggle .chevron { transform: rotate(-90deg); }
+
+      /* ---- Indicador de swipe no painel de detalhe ---- */
+      .detalhe::before {
+        content: '';
+        display: block;
+        width: 36px;
+        height: 4px;
+        background: var(--cinza-borda);
+        border-radius: 2px;
+        margin: 0 auto 14px;
+        flex-shrink: 0;
+      }
+    }
+
+    /* =========================================================================
        @MEDIA PRINT — oculta tudo exceto a folha A4
        ========================================================================= */
     @media print {
