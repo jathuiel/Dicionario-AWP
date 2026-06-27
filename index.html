@@ -13,7 +13,7 @@
   <!-- Cabeçalho mobile (oculto em telas maiores) -->
   <header class="header-mobile">
     <div class="ico">
-      <img src="assets/logo-partners.png" alt="Vale">
+      <img src="assets/simbolo_verum_branco.png" alt="Vale">
     </div>
     <b>Dicionário de Pacotes AWP</b>
   </header>
@@ -24,11 +24,11 @@
   <aside class="sidebar">
     <div class="logo">
       <div class="ico">
-        <img src="assets/logo-partners.png" alt=" Vale"></div>
+        <img src="assets/simbolo_verum_branco.png" alt=" Vale"></div>
       <b>Dicionário de Pacotes<br>AWP</b>
     </div>
     <nav class="nav">
-      <a href="#" id="nav-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;"><span class="ico">🧩</span> Pacotes</a>
+      <a href="#" id="nav-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;"><span class="ico">📦</span> Pacotes</a>
       <a href="#" id="nav-impressao" onclick="trocarAba('impressao');return false;"><span class="ico">🖨️</span> Imprimir</a>
     </nav>
     <div class="rodape">Projeto +20 N103101 - Usina</div>
@@ -108,7 +108,7 @@
   <!-- Navegação inferior mobile (oculta em telas maiores) -->
   <nav class="nav-bottom">
     <a href="#" id="nav-bottom-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;">
-      <span class="ico">🧩</span>
+      <span class="ico">📦</span>
       <small>Pacotes</small>
     </a>
     <a href="#" id="nav-bottom-impressao" onclick="trocarAba('impressao');return false;">
@@ -278,7 +278,7 @@
       if (!p) {
         d.innerHTML = `
           <div class="vazio">
-            <div class="big">▦</div>
+            <div class="big">📦</div>
             <h2>Selecione um pacote</h2>
             <p>Escolha um pacote na lista ao lado para ver suas vistas e informações.</p>
           </div>`;
@@ -302,7 +302,7 @@
 
         <!-- Cabeçalho do pacote -->
         <div class="det-cab">
-          <div class="icone">▦</div>
+          <div class="icone">📦</div>
           <div>
             <h1>${p.iwp}</h1>
             <div class="sub">Pacote de Trabalho de Instalação · ${p.cwp}</div>
