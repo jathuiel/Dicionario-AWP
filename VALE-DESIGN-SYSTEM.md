@@ -11,7 +11,7 @@
 
 | Swatch | Token proposto | Nome | HEX | RGB | CMYK | Pantone |
 |--------|---------------|------|-----|-----|------|---------|
-| 🟩 | `--vale-green` | Verde Vale *(primária)* | `#00807C` | 0, 128, 124 | 100, 0, 3, 50 | 7717 C |
+| 🟩 | `--vale-green` | Verde Vale *(primária)* | `#00787e` | 0, 128, 124 | 100, 0, 3, 50 | 7717 C |
 | 🟨 | `--vale-yellow` | Amarelo Vale *(secundária)* | `#EEA722` | 238, 167, 34 | 0, 30, 86, 7 | 7409 C |
 | 🩶 | `--vale-gray` | Cinza Vale *(suporte)* | `#77787B` | 119, 120, 123 | 3, 2, 0, 52 | Cool Gray 9 C |
 | ⬛ | `--vale-black` | Preto | `#000000` | 0, 0, 0 | 0, 0, 0, 100 | — |
