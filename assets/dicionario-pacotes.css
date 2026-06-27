@@ -4,7 +4,7 @@
        ========================================================================= */
     :root {
       /* --- Cores primárias Vale --- */
-      --vale-green:        #00807C;   /* Verde Vale — cor primária da marca */
+      --vale-green:        #007a7e;   /* Verde Vale — cor primária da marca */
       --vale-green-dark:   #006661;   /* Verde escuro — sidebar, hover */
       --vale-green-light:  #E0F4F3;   /* Verde claro — fundos de destaque */
 
@@ -83,6 +83,14 @@
     .sidebar .logo b {
       font-size: 17px;
       line-height: 1.1;
+    }
+    /* Imagem do logo dentro do container .ico (sidebar e header mobile) */
+    .sidebar .logo .ico img,
+    .header-mobile .ico img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     /* Itens de navegação */

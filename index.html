@@ -12,8 +12,10 @@
 
   <!-- Cabeçalho mobile (oculto em telas maiores) -->
   <header class="header-mobile">
-    <div class="ico">◧</div>
-    <b>DICIONÁRIO AWP BIM</b>
+    <div class="ico">
+      <img src="assets/logo-partners.png" alt="Vale">
+    </div>
+    <b>Dicionário de Pacotes AWP</b>
   </header>
 
   <!-- ===================================================================== -->
@@ -21,14 +23,15 @@
   <!-- ===================================================================== -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="ico">◧</div>
-      <b>DICIONÁRIO<br>AWP BIM</b>
+      <div class="ico">
+        <img src="assets/logo-partners.png" alt=" Vale"></div>
+      <b>Dicionário de Pacotes<br>AWP</b>
     </div>
     <nav class="nav">
-      <a href="#" id="nav-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;"><span class="ico">▦</span> Pacotes</a>
+      <a href="#" id="nav-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;"><span class="ico">🧩</span> Pacotes</a>
       <a href="#" id="nav-impressao" onclick="trocarAba('impressao');return false;"><span class="ico">🖨️</span> Imprimir</a>
     </nav>
-    <div class="rodape"><span>◁</span> Projeto N103101 · Usina</div>
+    <div class="rodape">Projeto +20 N103101 - Usina</div>
   </aside>
 
   <!-- ===================================================================== -->
@@ -57,7 +60,7 @@
       </div>
       <div class="filtros-campos" id="filtros-campos">
         <div class="campo">
-          <label>Área</label>
+          <label>CWA</label>
           <select id="f-area"><option value="">Todas</option></select>
         </div>
         <div class="campo">
@@ -105,7 +108,7 @@
   <!-- Navegação inferior mobile (oculta em telas maiores) -->
   <nav class="nav-bottom">
     <a href="#" id="nav-bottom-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;">
-      <span class="ico">▦</span>
+      <span class="ico">🧩</span>
       <small>Pacotes</small>
     </a>
     <a href="#" id="nav-bottom-impressao" onclick="trocarAba('impressao');return false;">
@@ -124,10 +127,10 @@
 
     // Mapeia o código da disciplina para o nome completo exibido na interface.
     const DISC = {
-      S: 'Estrutura',
+      S: 'Estruturas Metálicas',
       E: 'Elétrica',
       M: 'Mecânica',
-      P: 'Tubulação',
+      T: 'Tubulação',
       A: 'Arquitetura'
     };
 
@@ -205,7 +208,7 @@
         c.innerHTML = `
           <div>
             <div class="cod">${p.iwp}</div>
-            <div class="nome">${p.cwp} · Área ${p.area}</div>
+            <div class="nome">${p.cwp} · CWA ${p.area}</div>
             <div class="disc">${nomeDisciplina(p.disc)}</div>
           </div>
           <span class="tag ativo">Ativo</span>`;
@@ -305,7 +308,7 @@
             <div class="sub">Pacote de Trabalho de Instalação · ${p.cwp}</div>
             <div class="badges">
               <span class="badge">● Disciplina: <b>${nomeDisciplina(p.disc)}</b></span>
-              <span class="badge">Área: <b>${p.area}</b></span>
+              <span class="badge">CWA: <b>${p.area}</b></span>
               <span class="badge verde">Status: Ativo</span>
             </div>
           </div>
@@ -317,7 +320,7 @@
             <h3>INFORMAÇÕES GERAIS</h3>
             <div class="info-linha"><span class="lbl">Código completo</span><span class="val">${p.id}</span></div>
             <div class="info-linha"><span class="lbl">Projeto</span><span class="val">KS-N103101</span></div>
-            <div class="info-linha"><span class="lbl">Área</span><span class="val">${p.area}</span></div>
+            <div class="info-linha"><span class="lbl">CWA</span><span class="val">${p.area}</span></div>
             <div class="info-linha"><span class="lbl">CWP</span><span class="val">${p.cwp}</span></div>
             <div class="info-linha"><span class="lbl">IWP</span><span class="val">${p.iwp}</span></div>
             <div class="info-linha"><span class="lbl">Disciplina</span><span class="val">${nomeDisciplina(p.disc)} (${p.disc})</span></div>
@@ -438,7 +441,7 @@
        EVENTOS DOS FILTROS
        ======================================================================= */
 
-    // Selects (Área, CWP, Disciplina): atualizam o filtro e reiniciam a página.
+    // Selects (CWA, CWP, Disciplina): atualizam o filtro e reiniciam a página.
     IDS_FILTROS.forEach(id =>
       document.getElementById(id).onchange = e => {
         const k = id.split('-')[1];
@@ -535,7 +538,7 @@
 
           <table class="imp-info">
             <tr><td>Projeto</td><td>KS-N103101</td></tr>
-            <tr><td>Área</td><td>${p.area}</td></tr>
+            <tr><td>CWA</td><td>${p.area}</td></tr>
             <tr><td>CWP</td><td>${p.cwp}</td></tr>
             <tr><td>IWP</td><td>${p.iwp}</td></tr>
             <tr><td>Disciplina</td><td>${nomeDisciplina(p.disc)} (${p.disc})</td></tr>
@@ -622,7 +625,7 @@
         const s = document.getElementById(id);
         while (s.options.length > 1) s.remove(1);
       });
-      unicos('area').forEach(a => add('f-area', a, 'Área ' + a));
+      unicos('area').forEach(a => add('f-area', a, 'CWA ' + a));
       unicos('cwp').forEach(c => add('f-cwp', c, c));
       unicos('disc').forEach(d => add('f-disc', d, nomeDisciplina(d) + ' (' + d + ')'));
 
