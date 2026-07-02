@@ -1,32 +1,33 @@
     /* =========================================================================
-       TOKENS DE DESIGN — IDENTIDADE VISUAL VALE
-       Baseado no Guia Rápido da Marca Vale. Ver VALE-DESIGN-SYSTEM.md.
+       TOKENS DE DESIGN — cores, status e aliases semânticos
        ========================================================================= */
     :root {
-      /* --- Cores primárias Vale --- */
-      --vale-green:        #007a7e;   /* Verde Vale — cor primária da marca */
-      --vale-green-dark:   #006661;   /* Verde escuro — sidebar, hover */
-      --vale-green-light:  #E0F4F3;   /* Verde claro — fundos de destaque */
+      /* --- Cores primárias da marca (troque estes valores por cliente) --- */
+      --brand-gradient: linear-gradient(180deg ,#01a39e 0%, #007E7a 50%, #015551 100%);
+      --brand-primary-alpha:  #007a7e33; /* Cor primária com 20% de opacidade */
+      --brand-primary:        #007a7e;   /* Cor primária da marca */
+      --brand-primary-dark:   #006661;   /* Variante escura — sidebar, hover */
+      --brand-primary-light:  #E0F4F3;   /* Variante clara — fundos de destaque */
 
-      /* --- Cores secundárias Vale --- */
-      --vale-yellow:       #EEA722;   /* Amarelo Vale — destaque e seleção */
-      --vale-yellow-light: #FDF3D9;   /* Amarelo claro — fundo de badge */
+      /* --- Cores de destaque da marca --- */
+      --brand-accent:       #f7d58b;   /* Destaque e seleção */
+      --brand-accent-light: #FDF3D9;   /* Destaque claro — fundo de badge */
 
-      /* --- Neutros Vale --- */
-      --vale-gray:         #77787B;   /* Cinza Vale — texto secundário */
-      --vale-gray-light:   #F4F6F8;   /* Cinza claro — fundo geral */
-      --vale-gray-border:  #E2E7F0;   /* Cinza borda — divisórias */
-      --vale-black:        #1A1A1A;   /* Texto principal */
-      --vale-white:        #FFFFFF;
+      /* --- Neutros --- */
+      --neutral-gray:   #77787B;   /* Texto secundário */
+      --neutral-bg:     #F4F6F8;   /* Fundo geral */
+      --neutral-border: #E2E7F0;   /* Bordas e divisórias */
+      --neutral-black:  #1A1A1A;   /* Texto principal */
+      --neutral-white:  #FFFFFF;
 
       /* --- Aliases semânticos (compatibilidade com o CSS existente) --- */
-      --azul-escuro: var(--vale-green-dark);
-      --azul:        var(--vale-green);
-      --azul-claro:  var(--vale-yellow);
-      --cinza-bg:    var(--vale-gray-light);
-      --cinza-borda: var(--vale-gray-border);
-      --texto:       var(--vale-black);
-      --texto-sec:   var(--vale-gray);
+      --azul-escuro: var(--brand-primary-dark);
+      --azul:        var(--brand-primary);
+      --azul-claro:  var(--brand-accent);
+      --cinza-bg:    var(--neutral-bg);
+      --cinza-borda: var(--neutral-border);
+      --texto:       var(--neutral-black);
+      --texto-sec:   var(--neutral-gray);
 
       /* --- Status (convenção interna da equipe — não alterados) --- */
       --verde:       #16a34a;  --verde-bg:  #dcfce7;   /* status "Ativo" */
@@ -44,7 +45,7 @@
     }
 
     body {
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Segoe UI semibold', Tahoma, Geneva, Verdana, sans-serif, Helvetica, sans-serif;
       background: var(--cinza-bg);
       color: var(--texto);
       display: flex;          /* layout em 3 colunas: sidebar | lista | detalhe */
@@ -58,7 +59,7 @@
     .sidebar {
       width: 240px;
       flex-shrink: 0;
-      background: var(--azul-escuro);
+      background: var(--brand-gradient);
       color: #fff;
       display: flex;
       flex-direction: column;
@@ -105,9 +106,9 @@
       border-left: 3px solid transparent;
     }
     .nav a.ativo {
-      background: var(--azul);
+      background: var(--brand-primary-alpha);
       color: #fff;
-      border-left-color: var(--vale-yellow);
+      border-left-color: var(--brand-accent);
     }
     .nav a:hover:not(.ativo) {
       background: rgba(0,0,0,.18);
@@ -252,7 +253,7 @@
     }
     .card.sel {
       background: var(--azul-claro);
-      border-color: var(--vale-yellow);
+      border-color: var(--brand-accent);
     }
     .card .cod {
       font-size: 13.5px;
@@ -654,7 +655,7 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2px solid var(--vale-green);
+      border-bottom: 2px solid var(--brand-primary);
       padding-bottom: 10px;
       margin-bottom: 16px;
     }
@@ -674,7 +675,7 @@
     }
     .imp-info td:first-child {
       width: 35%;
-      background: var(--vale-gray-light);
+      background: var(--neutral-bg);
       font-weight: 600;
       color: #6b7686;
     }
@@ -773,7 +774,7 @@
         height: 52px;
         flex-shrink: 0;
         background: var(--azul-escuro);
-        color: var(--vale-white);
+        color: var(--neutral-white);
         z-index: 10;
       }
       .header-mobile .ico {
@@ -864,8 +865,8 @@
       }
       .nav-bottom a .ico { font-size: 18px; line-height: 1; }
       .nav-bottom a.ativo {
-        color: var(--vale-white);
-        border-top-color: var(--vale-yellow);
+        color: var(--neutral-white);
+        border-top-color: var(--brand-accent);
       }
 
       /* ---- Ajustes de conteúdo no detalhe ---- */
@@ -914,7 +915,7 @@
 
       /* ---- Feedback visual no toque (sem hover no mobile) ---- */
       .card:active {
-        background: var(--vale-green-light);
+        background: var(--brand-primary-light);
         transform: scale(0.985);
         transition: transform .1s ease, background .1s ease;
       }
