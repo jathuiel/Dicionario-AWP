@@ -43,7 +43,7 @@
     <div class="topo-busca">
       <div class="busca">
         <span>🔍</span>
-        <input id="busca" type="text" placeholder="Pesquisar código do pacote (IWP, CWP)...">
+        <input id="busca" type="text" placeholder="Pesquisar código do pacote (IWP, CWP)">
       </div>
     </div>
 
@@ -56,7 +56,7 @@
             <i class="chevron">▾</i>
           </span>
         </div>
-        <span id="limpar">Limpar ⇄</span>
+        <span id="limpar">Limpar ⇄ </span>
       </div>
       <div class="filtros-campos" id="filtros-campos">
         <div class="campo">
@@ -297,7 +297,7 @@
       d.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
           <div class="voltar" style="margin:0" onclick="estado.sel=null;render()">← Voltar para a lista</div>
-          <button onclick="trocarAba('impressao')" style="padding:7px 16px;background:var(--azul);color:var(--vale-white);border:none;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Imprimir</button>
+          <button onclick="trocarAba('impressao')" style="padding:7px 16px;background:var(--azul);color:var(--neutral-white);border:none;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Imprimir</button>
         </div>
 
         <!-- Cabeçalho do pacote -->
@@ -308,7 +308,7 @@
             <div class="sub">Pacote de Trabalho de Instalação · ${p.cwp}</div>
             <div class="badges">
               <span class="badge">● Disciplina: <b>${nomeDisciplina(p.disc)}</b></span>
-              <span class="badge">CWA: <b>${p.area}</b></span>
+              <span class="badge">CWA:   <b>${p.area}</b></span>
               <span class="badge verde">Status: Ativo</span>
             </div>
           </div>
@@ -504,11 +504,11 @@
       const p = estado.sel;
       if (!p) {
         d.innerHTML = `
-          <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--vale-white);text-align:center;">
+          <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--neutral-white);text-align:center;">
             <div style="font-size:52px;margin-bottom:16px;opacity:.8;">🖨️</div>
             <h2 style="margin-bottom:8px;">Nenhum pacote selecionado</h2>
             <p>Selecione um pacote na aba <b>Pacotes</b> antes de imprimir.</p>
-            <button onclick="trocarAba('pacotes')" style="margin-top:20px;padding:10px 24px;background:var(--vale-white);color:var(--texto);border:none;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;">← Ir para Pacotes</button>
+            <button onclick="trocarAba('pacotes')" style="margin-top:20px;padding:10px 24px;background:var(--neutral-white);color:var(--texto);border:none;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;">← Ir para Pacotes</button>
           </div>`;
         return;
       }
@@ -520,7 +520,7 @@
         <div class="imp-controles">
           <button class="imp-btn-voltar" onclick="trocarAba('pacotes')">← Voltar</button>
           <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-size:12.5px;color:var(--vale-white);margin-right:4px;">Orientação:</span>
+            <span style="font-size:12.5px;color:var(--neutral-white);margin-right:4px;">Orientação:</span>
             <button class="imp-btn-orient ${estado.orientacao==='retrato'?'ativo':''}" onclick="mudarOrientacao('retrato')">📄 Retrato</button>
             <button class="imp-btn-orient ${estado.orientacao==='paisagem'?'ativo':''}" onclick="mudarOrientacao('paisagem')">🏞️ Paisagem</button>
           </div>
@@ -576,7 +576,7 @@
           <h2>Base de dados não encontrada</h2>
           <p>Não foi possível carregar <strong>data/imagens_base64.parquet</strong> automaticamente.<br>
           Selecione o arquivo manualmente para continuar.</p>
-          <label style="display:inline-block;margin-top:24px;padding:12px 28px;background:var(--azul);color:var(--vale-white);border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;">
+          <label style="display:inline-block;margin-top:24px;padding:12px 28px;background:var(--azul);color:var(--neutral-white);border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;">
             📂 Selecionar Parquet
             <input type="file" accept=".parquet" onchange="carregarParquetManual(this.files[0])" style="display:none">
           </label>
