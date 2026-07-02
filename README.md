@@ -16,7 +16,6 @@ Aplicação web para consulta e impressão de pacotes de trabalho AWP do **Proje
 ### Painel de detalhe
 - Informações completas do pacote (ID, Projeto, CWA, CWP, IWP, Disciplina).
 - Visualizador de vistas BIM com navegação sequencial (botões ‹ ›).
-- Galeria com todas as vistas do pacote em miniatura.
 - Link para abrir a imagem original em nova aba.
 
 ### Lightbox
@@ -40,18 +39,34 @@ Aplicação web para consulta e impressão de pacotes de trabalho AWP do **Proje
 ## Estrutura de arquivos
 
 ```
-├── index.html                  # Aplicação completa (HTML + JS inline)
+├── index.html                    # Estrutura da página (HTML puro)
 ├── assets/
-│   ├── dicionario-pacotes.css  # Estilos (tokens Vale, layout, responsivo)
+│   ├── dicionario-pacotes.css    # Estilos (tokens Vale, layout, responsivo)
+│   ├── dicionario-pacotes.js     # Lógica da aplicação (filtros, render, parquet)
 │   ├── logo vale.png
 │   ├── simbolo_verum_branco.png
 │   └── logo_partners.png
-├── data/
-│   ├── imagens_base64.parquet  # Base de dados principal (imagens em base64)
-│   └── pacotes-data.js         # Base de dados alternativa (referências a arquivos JPG)
-├── VALE-DESIGN-SYSTEM.md       # Tokens de cor e tipografia da identidade Vale
-└── Padroes de Commit.md        # Convenção de commits do projeto
+├── data/                         # Fonte única de dados
+│   ├── manifest.json             # Lista dos parquets a carregar (na ordem)
+│   ├── imagens_base64_1.parquet  # Bases de imagens (base64) — nomes livres
+│   ├── CWP-001-ISOLADAS.parquet
+│   └── pacotes-data.js           # Base alternativa (referências a arquivos JPG)
+├── DESIGN-SYSTEM.md              # Design system: tokens, tipografia e componentes
+└── Padroes de Commit.md          # Convenção de commits do projeto
 ```
+
+### Manifesto da base de dados
+
+A aplicação carrega os parquets listados em `data/manifest.json`, na ordem em que aparecem:
+
+```json
+[
+  "imagens_base64_1.parquet",
+  "CWP-001-ISOLADAS.parquet"
+]
+```
+
+Os nomes são **livres** — é possível nomear os arquivos por pacote ou ativo (ex.: `Correia058.parquet`). Para adicionar dados: copiar o parquet para `data/` e incluir o nome exato (respeitando maiúsculas/minúsculas) no manifesto. Todos os arquivos devem ter a mesma estrutura de colunas (ver abaixo).
 
 ---
 
@@ -70,17 +85,17 @@ python -m http.server 8080
 npx serve .
 ```
 
-A aplicação faz `fetch` de `data/imagens_base64.parquet` na inicialização. Isso exige um servidor HTTP — abrir `index.html` diretamente pelo navegador (`file://`) não funciona por restrições de CORS.
+A aplicação faz `fetch` de `data/manifest.json` e dos parquets nele listados na inicialização. Isso exige um servidor HTTP — abrir `index.html` diretamente pelo navegador (`file://`) não funciona por restrições de CORS.
 
 ### Fallback manual
 
-Se o arquivo não carregar automaticamente, o painel exibirá um botão **"Selecionar Parquet"**. Basta clicar e escolher `data/imagens_base64.parquet` na janela do sistema operacional.
+Se os arquivos não carregarem automaticamente, o painel exibirá um botão **"Selecionar Parquets"**. Basta clicar e escolher todos os parquets da base na janela do sistema operacional (seleção múltipla).
 
 ---
 
 ## Formato dos dados (Parquet)
 
-O arquivo `data/imagens_base64.parquet` deve ter as seguintes colunas:
+Cada parquet listado no manifesto deve ter as seguintes colunas:
 
 | Coluna | Tipo | Exemplo |
 |--------|------|---------|
@@ -118,7 +133,7 @@ Contrato
 
 ## Design System
 
-Tokens de cor, tipografia e regras de uso estão documentados em [`VALE-DESIGN-SYSTEM.md`](VALE-DESIGN-SYSTEM.md). Os tokens CSS (`--vale-green`, `--vale-yellow`, etc.) são definidos em `assets/dicionario-pacotes.css`.
+Tokens de cor, tipografia e regras de uso estão documentados em [`DESIGN-SYSTEM.md`](DESIGN-SYSTEM.md). Os tokens CSS (`--brand-primary`, `--brand-accent`, etc.) são definidos em `assets/dicionario-pacotes.css`.
 
 ---
 

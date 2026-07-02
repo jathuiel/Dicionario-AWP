@@ -1,0 +1,626 @@
+/* =======================================================================
+   CONSTANTES E ESTADO GLOBAL
+   ======================================================================= */
+
+// Base de dados carregada dinamicamente a partir dos parquets em data/.
+let PACOTES = [];
+
+// Mapeia o código da disciplina para o nome completo exibido na interface.
+const DISC = {
+  S: 'Estruturas Metálicas',
+  E: 'Elétrica',
+  M: 'Mecânica',
+  T: 'Tubulação',
+  A: 'Arquitetura'
+};
+
+// IDs dos três selects de filtro — fonte única de verdade para evitar repetição.
+const IDS_FILTROS = ['f-area', 'f-cwp', 'f-disc'];
+
+// Retorna o nome completo da disciplina ou o próprio código como fallback.
+const nomeDisciplina = d => DISC[d] || d;
+
+// Quantidade de pacotes exibidos por página da lista.
+const POR_PAGINA = 30;
+
+// Estado da aplicação: página atual, pacote selecionado, filtros, aba e orientação de impressão.
+let estado = {
+  pagina: 1,
+  sel: null,
+  filtros: { area: '', cwp: '', disc: '', busca: '' },
+  aba: 'pacotes',
+  orientacao: 'retrato'
+};
+
+/* =======================================================================
+   FILTROS — preenchimento dos selects
+   ======================================================================= */
+
+// Retorna os valores únicos de um campo dos pacotes, em ordem alfabética.
+function unicos(campo) {
+  return [...new Set(PACOTES.map(p => p[campo]))].sort();
+}
+
+// Adiciona uma <option> a um <select> pelo seu id.
+function add(id, val, txt) {
+  const o = document.createElement('option');
+  o.value = val;
+  o.textContent = txt;
+  document.getElementById(id).appendChild(o);
+}
+
+// Aplica os filtros ativos e devolve os pacotes correspondentes.
+function filtrados() {
+  const f = estado.filtros;
+  return PACOTES.filter(p =>
+    (!f.area  || p.area === f.area) &&
+    (!f.cwp   || p.cwp  === f.cwp)  &&
+    (!f.disc  || p.disc === f.disc) &&
+    (!f.busca || p.id.toLowerCase().includes(f.busca))
+  );
+}
+
+/* =======================================================================
+   RENDERIZAÇÃO DA LISTA E PAGINAÇÃO
+   ======================================================================= */
+function render() {
+  if (PACOTES.length === 0) { mostrarCarregador(); return; }
+  const dados   = filtrados();
+  const total   = dados.length;
+  const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+
+  // Volta para a primeira página se a página atual ficou fora do intervalo.
+  if (estado.pagina > paginas) estado.pagina = 1;
+
+  // Recorta apenas os itens da página atual.
+  const ini = (estado.pagina - 1) * POR_PAGINA;
+  const pag = dados.slice(ini, ini + POR_PAGINA);
+
+  document.getElementById('contagem').textContent =
+    total.toLocaleString('pt-BR') + ' resultados';
+
+  // ---- Monta os cards da lista ----
+  const lista = document.getElementById('lista');
+  lista.innerHTML = '';
+  pag.forEach(p => {
+    const c = document.createElement('div');
+    c.className = 'card' + (estado.sel && estado.sel.id === p.id ? ' sel' : '');
+    c.innerHTML = `
+      <div>
+        <div class="cod">${p.iwp}</div>
+        <div class="nome">${p.cwp} · CWA ${p.area}</div>
+        <div class="disc">${nomeDisciplina(p.disc)}</div>
+      </div>
+      <span class="tag ativo">Ativo</span>`;
+    // Ao clicar, seleciona o pacote e reinicia a vista exibida.
+    c.onclick = () => { estado.sel = p; estado.vista = 0; render(); };
+    lista.appendChild(c);
+  });
+
+  // ---- Monta a paginação ----
+  const pgEl = document.getElementById('paginacao');
+  pgEl.innerHTML = '';
+
+  // Fábrica de botões de paginação.
+  const btn = (txt, pg, dis, atual) => {
+    const b = document.createElement('button');
+    b.textContent = txt;
+    if (atual) b.className = 'atual';
+    if (dis)   b.disabled = true;
+    b.onclick = () => { estado.pagina = pg; render(); };
+    return b;
+  };
+
+  // Botão "anterior".
+  pgEl.appendChild(btn('‹', estado.pagina - 1, estado.pagina <= 1));
+
+  // Calcula quais números mostrar: primeiras/últimas 2 páginas, vizinhas da
+  // atual e reticências ('…') para os intervalos ocultos.
+  const wins = [];
+  for (let i = 1; i <= paginas; i++) {
+    if (i <= 2 || i > paginas - 2 || Math.abs(i - estado.pagina) <= 1) {
+      wins.push(i);
+    } else if (wins[wins.length - 1] !== '…') {
+      wins.push('…');
+    }
+  }
+
+  // Renderiza números e reticências.
+  wins.forEach(i => {
+    if (i === '…') {
+      const s = document.createElement('span');
+      s.textContent = '…';
+      s.style.padding = '0 4px';
+      pgEl.appendChild(s);
+    } else {
+      pgEl.appendChild(btn(i, i, false, i === estado.pagina));
+    }
+  });
+
+  // Botão "próxima".
+  pgEl.appendChild(btn('›', estado.pagina + 1, estado.pagina >= paginas));
+
+  renderDetalhe();
+
+  // Sincroniza data-sel para controle do painel deslizante no mobile
+  if (estado.sel) document.body.setAttribute('data-sel', 'true');
+  else document.body.removeAttribute('data-sel');
+}
+
+/* =======================================================================
+   RENDERIZAÇÃO DO PAINEL DE DETALHE
+   ======================================================================= */
+function renderDetalhe() {
+  const d = document.getElementById('detalhe');
+  const p = estado.sel;
+
+  // Sem pacote selecionado: exibe o estado vazio.
+  if (!p) {
+    d.innerHTML = `
+      <div class="vazio">
+        <div class="big">📦</div>
+        <h2>Selecione um pacote</h2>
+        <p>Escolha um pacote na lista ao lado para ver suas vistas e informações.</p>
+      </div>`;
+    return;
+  }
+
+  // Vistas do pacote no formato [[nome, arquivo], ...] e qual está ativa.
+  const vistas = Object.entries(p.views);
+  if (!vistas.length) {
+    d.innerHTML = `<div class="vazio"><div class="big">📦</div><h2>Sem vistas disponíveis</h2><p>Este pacote não possui imagens cadastradas.</p></div>`;
+    return;
+  }
+  const vAtiva = Math.min(estado.vista || 0, vistas.length - 1);
+  const [vNome, vArq] = vistas[vAtiva];
+
+  d.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div class="voltar" style="margin:0" onclick="estado.sel=null;render()">← Voltar para a lista</div>
+      <button onclick="trocarAba('impressao')" style="padding:7px 16px;background:var(--azul);color:var(--neutral-white);border:none;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Imprimir</button>
+    </div>
+
+    <!-- Cabeçalho do pacote -->
+    <div class="det-cab">
+      <div class="icone">📦</div>
+      <div>
+        <h1>${p.iwp}</h1>
+        <div class="sub">Pacote de Trabalho de Instalação · ${p.cwp}</div>
+        <div class="badges">
+          <span class="badge">● Disciplina: <b>${nomeDisciplina(p.disc)}</b></span>
+          <span class="badge">CWA:   <b>${p.area}</b></span>
+          <span class="badge verde">Status: Ativo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informações gerais + visualizador -->
+    <div class="grid">
+      <div class="painel">
+        <h3>INFORMAÇÕES GERAIS</h3>
+        <div class="info-linha"><span class="lbl">Código completo</span><span class="val">${p.id}</span></div>
+        <div class="info-linha"><span class="lbl">Projeto</span><span class="val">KS-N103101</span></div>
+        <div class="info-linha"><span class="lbl">CWA</span><span class="val">${p.area}</span></div>
+        <div class="info-linha"><span class="lbl">CWP</span><span class="val">${p.cwp}</span></div>
+        <div class="info-linha"><span class="lbl">IWP</span><span class="val">${p.iwp}</span></div>
+        <div class="info-linha"><span class="lbl">Disciplina</span><span class="val">${nomeDisciplina(p.disc)} (${p.disc})</span></div>
+        <div class="info-linha"><span class="lbl">Vistas disponíveis</span><span class="val">${vistas.length}</span></div>
+      </div>
+
+      <div class="painel">
+        <h3 id="det-panel-bim-titulo">MODELO BIM — VISTA: ${vNome.toUpperCase()}</h3>
+
+        <!-- Visualizador da vista ativa -->
+        <div class="visualizador">
+          <button class="nav-vista esq" onclick="trocaVista(-1)">‹</button>
+          <img id="det-img" src="${cssEsc(vArq)}" onclick="abreLightbox(${vAtiva})" alt="${vNome}">
+          <button class="nav-vista dir" onclick="trocaVista(1)">›</button>
+          <span class="vista-label" id="det-vista-label">${vNome}</span>
+        </div>
+
+        <!-- Nome da vista ativa + link para abrir a imagem -->
+        <div class="arquivo-linha">
+          <span id="det-arquivo-span">Vista: ${vNome}</span>
+          <a id="det-link-original" href="${vArq}" target="_blank" style="color:var(--azul);text-decoration:none">Abrir original ↗</a>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Avança/recua na lista de vistas e atualiza apenas os elementos afetados.
+function trocaVista(dir) {
+  if (!estado.sel) return;
+  const n = Object.keys(estado.sel.views).length;
+  estado.vista = ((estado.vista || 0) + dir + n) % n;
+  atualizaVista();
+}
+
+// Atualiza cirurgicamente os elementos que dependem da vista ativa,
+// sem re-renderizar o painel inteiro nem recarregar imagens.
+function atualizaVista() {
+  if (!estado.sel) return;
+  const vistas = Object.entries(estado.sel.views);
+  if (!vistas.length) return;
+  const vAtiva = Math.min(estado.vista || 0, vistas.length - 1);
+  const [vNome, vArq] = vistas[vAtiva];
+
+  const img = document.getElementById('det-img');
+  if (img) { img.src = cssEsc(vArq); img.alt = vNome; img.onclick = () => abreLightbox(vAtiva); }
+
+  const get = id => document.getElementById(id);
+  if (get('det-vista-label'))      get('det-vista-label').textContent       = vNome;
+  if (get('det-panel-bim-titulo')) get('det-panel-bim-titulo').textContent  = `MODELO BIM — VISTA: ${vNome.toUpperCase()}`;
+  if (get('det-arquivo-span'))     get('det-arquivo-span').textContent      = `Vista: ${vNome}`;
+  if (get('det-link-original'))    get('det-link-original').href            = vArq;
+}
+
+// Escapa espaços e aspas simples para uso seguro em URLs de imagem.
+function cssEsc(s) {
+  return s.replace(/'/g, "%27").replace(/ /g, '%20');
+}
+
+/* =======================================================================
+   LIGHTBOX
+   ======================================================================= */
+let lbVistas = [];   // vistas do pacote atual: [[nome, arquivo], ...]
+let lbIdx = 0;       // índice da vista exibida no lightbox
+
+// Abre o lightbox na vista de índice i.
+function abreLightbox(i) {
+  lbVistas = Object.entries(estado.sel.views);
+  lbIdx = i;
+  document.getElementById('lightbox').classList.add('aberto');
+  mostraLb();
+}
+
+// Atualiza a imagem e a legenda do lightbox conforme lbIdx.
+function mostraLb() {
+  const [n, a] = lbVistas[lbIdx];
+  document.getElementById('lb-img').src = cssEsc(a);
+  document.getElementById('lb-cap').textContent = `${estado.sel.iwp} — ${n}`;
+}
+
+// Navega entre as vistas dentro do lightbox (circular).
+function navLb(d) {
+  lbIdx = (lbIdx + d + lbVistas.length) % lbVistas.length;
+  mostraLb();
+}
+
+// Eventos de fechar e navegar no lightbox.
+document.getElementById('lb-fechar').onclick =
+  () => document.getElementById('lightbox').classList.remove('aberto');
+document.getElementById('lb-esq').onclick = () => navLb(-1);
+document.getElementById('lb-dir').onclick = () => navLb(1);
+
+// Fecha ao clicar no fundo (fora da imagem).
+document.getElementById('lightbox').onclick = e => {
+  if (e.target.id === 'lightbox') e.currentTarget.classList.remove('aberto');
+};
+
+// Atalhos de teclado: só agem com o lightbox aberto.
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('aberto')) return;
+  if (e.key === 'Escape')     document.getElementById('lightbox').classList.remove('aberto');
+  if (e.key === 'ArrowLeft')  navLb(-1);
+  if (e.key === 'ArrowRight') navLb(1);
+});
+
+/* =======================================================================
+   EVENTOS DOS FILTROS
+   ======================================================================= */
+
+// Selects (CWA, CWP, Disciplina): atualizam o filtro e reiniciam a página.
+IDS_FILTROS.forEach(id =>
+  document.getElementById(id).onchange = e => {
+    const k = id.split('-')[1];
+    estado.filtros[k] = e.target.value;
+    estado.pagina = 1;
+    render();
+  });
+
+// Campo de busca: filtra por código do pacote em tempo real.
+document.getElementById('busca').oninput = e => {
+  estado.filtros.busca = e.target.value.toLowerCase();
+  estado.pagina = 1;
+  render();
+};
+
+// Botão "Limpar": zera todos os filtros e a busca.
+document.getElementById('limpar').onclick = () => {
+  estado.filtros = { area: '', cwp: '', disc: '', busca: '' };
+  estado.pagina = 1;
+  IDS_FILTROS.forEach(id => document.getElementById(id).value = '');
+  document.getElementById('busca').value = '';
+  render();
+};
+
+/* =======================================================================
+   ALTERNÂNCIA DE ABAS
+   ======================================================================= */
+
+// Visibilidade das seções é controlada pelo CSS via body[data-aba].
+function trocarAba(aba) {
+  if (aba === 'impressao' && PACOTES.length === 0) { mostrarCarregador(); return; }
+  estado.aba = aba;
+  document.body.dataset.aba = aba;
+  document.querySelectorAll('.nav a').forEach(a => a.classList.remove('ativo'));
+  document.getElementById('nav-' + aba).classList.add('ativo');
+  document.querySelectorAll('.nav-bottom a').forEach(a => a.classList.remove('ativo'));
+  const navB = document.getElementById('nav-bottom-' + aba);
+  if (navB) navB.classList.add('ativo');
+  if (aba === 'impressao') renderImpressao();
+}
+
+/* =======================================================================
+   ORIENTAÇÃO DE IMPRESSÃO
+   ======================================================================= */
+
+function mudarOrientacao(o) {
+  estado.orientacao = o;
+  let s = document.getElementById('imp-page-orient');
+  if (!s) { s = document.createElement('style'); s.id = 'imp-page-orient'; document.head.appendChild(s); }
+  s.textContent = `@page { size: ${o === 'paisagem' ? 'landscape' : 'portrait'}; }`;
+  renderImpressao();
+}
+
+/* =======================================================================
+   RENDERIZAÇÃO DA ABA IMPRESSÃO
+   ======================================================================= */
+
+function renderImpressao() {
+  const d = document.getElementById('area-impressao');
+  const p = estado.sel;
+  if (!p) {
+    d.innerHTML = `
+      <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--neutral-white);text-align:center;">
+        <div style="font-size:52px;margin-bottom:16px;opacity:.8;">🖨️</div>
+        <h2 style="margin-bottom:8px;">Nenhum pacote selecionado</h2>
+        <p>Selecione um pacote na aba <b>Pacotes</b> antes de imprimir.</p>
+        <button onclick="trocarAba('pacotes')" style="margin-top:20px;padding:10px 24px;background:var(--neutral-white);color:var(--texto);border:none;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;">← Ir para Pacotes</button>
+      </div>`;
+    return;
+  }
+
+  const vistas = Object.entries(p.views);
+  const hoje   = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  d.innerHTML = `
+    <div class="imp-controles">
+      <button class="imp-btn-voltar" onclick="trocarAba('pacotes')">← Voltar</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-size:12.5px;color:var(--neutral-white);margin-right:4px;">Orientação:</span>
+        <button class="imp-btn-orient ${estado.orientacao==='retrato'?'ativo':''}" onclick="mudarOrientacao('retrato')">📄 Retrato</button>
+        <button class="imp-btn-orient ${estado.orientacao==='paisagem'?'ativo':''}" onclick="mudarOrientacao('paisagem')">🏞️ Paisagem</button>
+      </div>
+      <button class="imp-btn-print"  onclick="window.print()">🖨️ Imprimir</button>
+    </div>
+
+    <div class="imp-pagina${estado.orientacao==='paisagem'?' imp-pagina--paisagem':''}">
+      <div class="imp-topo">
+        <div>
+          <h2>${p.id}</h2>
+          <div class="sub">Dicionário Visual AWP BIM · Projeto KS-N103101 · Usina</div>
+        </div>
+        <div class="data">${hoje}</div>
+      </div>
+
+      <table class="imp-info">
+        <tr><td>Projeto</td><td>KS-N103101</td></tr>
+        <tr><td>CWA</td><td>${p.area}</td></tr>
+        <tr><td>CWP</td><td>${p.cwp}</td></tr>
+        <tr><td>IWP</td><td>${p.iwp}</td></tr>
+        <tr><td>Disciplina</td><td>${nomeDisciplina(p.disc)} (${p.disc})</td></tr>
+        <tr><td>Vistas disponíveis</td><td>${vistas.length}</td></tr>
+      </table>
+
+      <div class="imp-sec-titulo">VISTAS DO MODELO BIM</div>
+      <div class="imp-galeria">
+        ${vistas.map(([nome, src]) => `
+          <div class="imp-vista">
+            <img src="${cssEsc(src)}" alt="${nome}">
+            <div class="imp-cap">${nome}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="imp-rodape">
+        <span>Dicionário Visual AWP BIM · KS-N103101</span>
+        <span>Gerado em ${hoje}</span>
+      </div>
+    </div>`;
+}
+
+/* =======================================================================
+   CARREGAMENTO DOS PARQUETS — data/ é a fonte única de dados
+   ======================================================================= */
+
+// Exibe seletor manual de arquivos .parquet como fallback.
+function mostrarCarregador() {
+  document.getElementById('lista').innerHTML = '';
+  document.getElementById('paginacao').innerHTML = '';
+  document.getElementById('contagem').textContent = 'Aguardando dados...';
+  document.getElementById('detalhe').innerHTML = `
+    <div class="vazio">
+      <div class="big">📂</div>
+      <h2>Base de dados não encontrada</h2>
+      <p>Não foi possível carregar os parquets listados em <strong>data/manifest.json</strong>.<br>
+      Verifique o manifesto ou selecione os arquivos manualmente para continuar.</p>
+      <label style="display:inline-block;margin-top:24px;padding:12px 28px;background:var(--azul);color:var(--neutral-white);border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;">
+        📂 Selecionar Parquets
+        <input type="file" accept=".parquet" multiple onchange="carregarParquetManual(this.files)" style="display:none">
+      </label>
+    </div>`;
+}
+
+// Constrói PACOTES a partir das linhas de todos os parquets e inicializa a aplicação.
+function processarLinhasParquet(rows) {
+  if (!rows || !rows.length) { mostrarCarregador(); return; }
+
+  const mapa = new Map();
+
+  for (const row of rows) {
+    const iwpFull = String(row['IWP']      ?? '');
+    const mime    = String(row['MimeType'] ?? '');
+    const pic     = String(row['Pic']      ?? '');
+
+    if (!iwpFull || !mime || !pic) continue;
+
+    const sep = iwpFull.lastIndexOf(' - ');
+    if (sep === -1) continue;
+    const pacId = iwpFull.substring(0, sep);
+    const vista = iwpFull.substring(sep + 3);
+
+    const pts = pacId.split('-');
+    if (pts.length < 9) continue;
+
+    const area = pts[2];
+    const disc = pts[3];
+    const cwp  = pts[5] + '-' + pts[6];
+    const iwp  = pts[7] + '-' + pts[8];
+
+    if (!mapa.has(pacId))
+      mapa.set(pacId, { id: pacId, area, cwp, iwp, disc, views: {} });
+
+    const pkg = mapa.get(pacId);
+    if (pkg.views[vista])
+      pkg.views[vista] += pic;
+    else
+      pkg.views[vista] = 'data:' + mime + ';base64,' + pic;
+  }
+
+  PACOTES = [...mapa.values()];
+
+  IDS_FILTROS.forEach(id => {
+    const s = document.getElementById(id);
+    while (s.options.length > 1) s.remove(1);
+  });
+  unicos('area').forEach(a => add('f-area', a, 'CWA ' + a));
+  unicos('cwp').forEach(c => add('f-cwp', c, c));
+  unicos('disc').forEach(d => add('f-disc', d, nomeDisciplina(d) + ' (' + d + ')'));
+
+  render();
+}
+
+// Lê um ArrayBuffer de parquet e devolve suas linhas (suporte a GZIP via hyparquet-compressors).
+async function lerParquetDeBuffer(buffer) {
+  const [{ parquetRead }, { compressors }] = await Promise.all([
+    import('https://cdn.jsdelivr.net/npm/hyparquet/+esm'),
+    import('https://cdn.jsdelivr.net/npm/hyparquet-compressors/+esm')
+  ]);
+  const asyncBuffer = {
+    byteLength: buffer.byteLength,
+    slice: async (start, end) => buffer.slice(start, end)
+  };
+  let rows = [];
+  await parquetRead({
+    file: asyncBuffer,
+    compressors,
+    rowFormat: 'object',
+    onComplete: r => rows = r
+  });
+  return rows;
+}
+
+// Carregamento via seleção manual de arquivos (fallback para file://).
+// Ordena por nome para preservar a ordem dos fragmentos base64.
+async function carregarParquetManual(arquivos) {
+  document.getElementById('detalhe').innerHTML = `
+    <div class="vazio">
+      <div class="big">⏳</div>
+      <h2>Processando...</h2>
+      <p>Lendo os arquivos parquet. Aguarde.</p>
+    </div>`;
+  try {
+    const lista = [...arquivos].sort((a, b) => a.name.localeCompare(b.name));
+    let rows = [];
+    for (const arq of lista)
+      rows = rows.concat(await lerParquetDeBuffer(await arq.arrayBuffer()));
+    processarLinhasParquet(rows);
+  } catch (e) {
+    console.error('Erro ao ler parquet manual:', e);
+    mostrarCarregador();
+  }
+}
+
+// Inicialização: lê data/manifest.json e carrega cada parquet listado,
+// na ordem do manifesto. Para adicionar dados: copiar o arquivo para
+// data/ e incluir o nome no manifesto.
+async function inicializar() {
+  document.getElementById('contagem').textContent = 'Carregando...';
+  document.getElementById('detalhe').innerHTML = `
+    <div class="vazio">
+      <div class="big">⏳</div>
+      <h2>Carregando base de dados...</h2>
+      <p>Lendo os parquets listados em <strong>data/manifest.json</strong>...</p>
+    </div>`;
+  try {
+    const resp = await fetch('data/manifest.json');
+    if (!resp.ok) throw new Error('manifest.json: HTTP ' + resp.status);
+    const nomes = await resp.json();
+    if (!Array.isArray(nomes) || !nomes.length) throw new Error('manifest.json vazio ou inválido');
+
+    let rows = [];
+    for (const nome of nomes) {
+      const r = await fetch('data/' + encodeURIComponent(nome));
+      if (!r.ok) throw new Error(`${nome}: HTTP ${r.status}`);
+      rows = rows.concat(await lerParquetDeBuffer(await r.arrayBuffer()));
+    }
+    processarLinhasParquet(rows);
+  } catch (e) {
+    console.error('Erro ao carregar parquets:', e);
+    mostrarCarregador();
+  }
+}
+
+/* =======================================================================
+   FILTROS RECOLHÍVEIS
+   ======================================================================= */
+
+function toggleFiltros() {
+  document.getElementById('filtros-bloco').classList.toggle('filtros--recolhido');
+}
+
+/* =======================================================================
+   GESTOS DE SWIPE (touch-first, passive listeners)
+   ======================================================================= */
+(function initSwipes() {
+  let t0x = 0, t0y = 0, alvo = null;
+
+  const det = document.querySelector('.detalhe');
+  const lb  = document.getElementById('lightbox');
+
+  function onStart(e) {
+    t0x  = e.touches[0].clientX;
+    t0y  = e.touches[0].clientY;
+    // Define o alvo do gesto pela origem do toque
+    if (e.target.closest('.visualizador'))    alvo = 'vis';
+    else if (e.currentTarget === lb)          alvo = 'lb';
+    else if (t0x < 48)                        alvo = 'back'; // borda esquerda → voltar
+    else                                       alvo = null;
+  }
+
+  function onEnd(e) {
+    const dx = e.changedTouches[0].clientX - t0x;
+    const dy = Math.abs(e.changedTouches[0].clientY - t0y);
+    // Ignora gestos mais verticais do que horizontais
+    if (dy > Math.abs(dx) * 1.2 || Math.abs(dx) < 40) return;
+
+    switch (alvo) {
+      case 'back':
+        if (dx > 0 && estado.sel) { estado.sel = null; render(); }
+        break;
+      case 'vis':
+        trocaVista(dx < 0 ? 1 : -1);
+        break;
+      case 'lb':
+        navLb(dx < 0 ? 1 : -1);
+        break;
+    }
+  }
+
+  det.addEventListener('touchstart', onStart, { passive: true });
+  det.addEventListener('touchend',   onEnd,   { passive: true });
+  lb.addEventListener('touchstart',  onStart, { passive: true });
+  lb.addEventListener('touchend',    onEnd,   { passive: true });
+})();
+
+inicializar();
