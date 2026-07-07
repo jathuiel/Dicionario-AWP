@@ -3,122 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dicionário de Pacotes AWP</title>
-
-  <link rel="stylesheet" href="assets/dicionario-pacotes.css">
+  <title>Dicionário Visual AWP — Squads</title>
+  <style>
+    :root {
+      --brand-primary: #007a7e;
+      --brand-gradient: linear-gradient(180deg, #01a39e, #007E7a 50%, #015551);
+      --neutral-black: #1A1A1A;
+      --neutral-gray: #77787B;
+      --neutral-bg: #F4F6F8;
+      --neutral-border: #E2E7F0;
+      --neutral-white: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      background: var(--neutral-bg);
+      font-family: 'Segoe UI semibold', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--neutral-black);
+      padding: 24px;
+    }
+    header { text-align: center; }
+    header h1 { margin: 0 0 6px; font-size: 24px; }
+    header p { margin: 0; color: var(--neutral-gray); font-size: 14.5px; }
+    .squads {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px;
+      max-width: 720px;
+    }
+    .card {
+      width: 260px;
+      padding: 28px 20px;
+      background: var(--neutral-white);
+      border: 1px solid var(--neutral-border);
+      border-radius: 14px;
+      text-decoration: none;
+      color: inherit;
+      text-align: center;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .card:not(.em-breve):hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,.08);
+    }
+    .card .ico {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: var(--brand-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .card b { display: block; font-size: 16px; margin-bottom: 4px; }
+    .card small { color: var(--neutral-gray); font-size: 12.5px; }
+    .card.em-breve { opacity: .55; cursor: default; }
+  </style>
 </head>
-
 <body>
-
-  <!-- Cabeçalho mobile (oculto em telas maiores) -->
-  <header class="header-mobile">
-    <div class="ico">
-      <img src="assets/simbolo_verum_branco.png" alt="Vale">
-    </div>
-    <b>Dicionário de Pacotes AWP</b>
+  <header>
+    <h1>Dicionário Visual AWP</h1>
+    <p>Selecione o Squad para acessar o dicionário de pacotes</p>
   </header>
-
-  <!-- ===================================================================== -->
-  <!-- SIDEBAR                                                               -->
-  <!-- ===================================================================== -->
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="ico">
-        <img src="assets/simbolo_verum_branco.png" alt="Vale"></div>
-      <b>Dicionário de Pacotes<br>AWP</b>
-    </div>
-    <nav class="nav">
-      <a href="#" id="nav-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;"><span class="ico">📦</span> Pacotes</a>
-      <a href="#" id="nav-impressao" onclick="trocarAba('impressao');return false;"><span class="ico">🖨️</span> Imprimir</a>
-    </nav>
-    <div class="rodape">Projeto +20 N103101 - Usina</div>
-  </aside>
-
-  <!-- ===================================================================== -->
-  <!-- COLUNA LISTA (busca + filtros + lista + paginação)                    -->
-  <!-- ===================================================================== -->
-  <section class="coluna-lista">
-
-    <!-- Campo de busca -->
-    <div class="topo-busca">
-      <div class="busca">
-        <span>🔍</span>
-        <input id="busca" type="text" placeholder="Pesquisar código do pacote (IWP, CWP)">
-      </div>
-    </div>
-
-    <!-- Filtros (preenchidos dinamicamente via JS) -->
-    <div class="filtros" id="filtros-bloco">
-      <div class="cab">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <b>FILTROS</b>
-          <span class="filtro-toggle" id="filtro-toggle" onclick="toggleFiltros()" title="Recolher filtros">
-            <i class="chevron">▾</i>
-          </span>
-        </div>
-        <span id="limpar">Limpar ⇄ </span>
-      </div>
-      <div class="filtros-campos" id="filtros-campos">
-        <div class="campo">
-          <label>CWA</label>
-          <select id="f-area"><option value="">Todas</option></select>
-        </div>
-        <div class="campo">
-          <label>CWP</label>
-          <select id="f-cwp"><option value="">Todos</option></select>
-        </div>
-        <div class="campo">
-          <label>Disciplina</label>
-          <select id="f-disc"><option value="">Todas</option></select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Cabeçalho + lista de cards -->
-    <div class="lista-cab">
-      <b>LISTA DE PACOTES</b>
-      <small id="contagem"></small>
-    </div>
-    <div class="lista" id="lista"></div>
-    <div class="paginacao" id="paginacao"></div>
-
-  </section>
-
-  <!-- ===================================================================== -->
-  <!-- DETALHE (renderizado dinamicamente via JS)                            -->
-  <!-- ===================================================================== -->
-  <main class="detalhe" id="detalhe"></main>
-
-  <!-- ===================================================================== -->
-  <!-- ABA IMPRESSÃO (pré-visualização e impressão do pacote selecionado)    -->
-  <!-- ===================================================================== -->
-  <div class="area-impressao" id="area-impressao"></div>
-
-  <!-- ===================================================================== -->
-  <!-- LIGHTBOX (imagem em tela cheia)                                       -->
-  <!-- ===================================================================== -->
-  <div class="lightbox" id="lightbox">
-    <span class="fechar" id="lb-fechar">×</span>
-    <span class="lb-nav esq" id="lb-esq">‹</span>
-    <img id="lb-img" src="" alt="">
-    <span class="lb-nav dir" id="lb-dir">›</span>
-    <span class="lb-cap" id="lb-cap"></span>
+  <div class="squads">
+    <a class="card" href="classificacao/classificacao.html">
+      <div class="ico">📦</div>
+      <b>Classificação</b>
+      <small>Dicionário de Pacotes</small>
+    </a>
+    <a class="card" href="britagem/britagem.html">
+      <div class="ico">🪨</div>
+      <b>Britagem</b>
+      <small>Dicionário de Pacotes</small>
+    </a>
   </div>
-
-  <!-- Navegação inferior mobile (oculta em telas maiores) -->
-  <nav class="nav-bottom">
-    <a href="#" id="nav-bottom-pacotes" class="ativo" onclick="trocarAba('pacotes');return false;">
-      <span class="ico">📦</span>
-      <small>Pacotes</small>
-    </a>
-    <a href="#" id="nav-bottom-impressao" onclick="trocarAba('impressao');return false;">
-      <span class="ico">🖨️</span>
-      <small>Imprimir</small>
-    </a>
-  </nav>
-
-  <!-- Lógica da aplicação (mesmo nome-base do CSS, em assets/) -->
-  <script src="assets/dicionario-pacotes.js"></script>
-
 </body>
 </html>

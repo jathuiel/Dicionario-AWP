@@ -39,30 +39,32 @@ Aplicação web para consulta e impressão de pacotes de trabalho AWP do **Proje
 ## Estrutura de arquivos
 
 ```
-├── index.html                    # Estrutura da página (HTML puro)
+├── index.html                    # Landing: seleção de squad (Classificação / Britagem)
+├── classificacao/
+│   ├── classificacao.html        # Página do dicionário (lógica inline no <script>)
+│   └── data/
+│       ├── manifest.json         # Lista dos parquets a carregar (na ordem)
+│       └── *.parquet             # Bases de imagens (base64) — nomes livres
+├── britagem/
+│   ├── britagem.html             # Mesma estrutura de classificacao.html
+│   └── data/
+│       └── manifest.json
 ├── assets/
 │   ├── dicionario-pacotes.css    # Estilos (tokens Vale, layout, responsivo)
-│   ├── dicionario-pacotes.js     # Lógica da aplicação (filtros, render, parquet)
 │   ├── logo vale.png
-│   ├── simbolo_verum_branco.png
-│   └── logo_partners.png
-├── data/                         # Fonte única de dados
-│   ├── manifest.json             # Lista dos parquets a carregar (na ordem)
-│   ├── imagens_base64_1.parquet  # Bases de imagens (base64) — nomes livres
-│   ├── CWP-001-ISOLADAS.parquet
-│   └── pacotes-data.js           # Base alternativa (referências a arquivos JPG)
+│   └── simbolo_verum_branco.png
 ├── DESIGN-SYSTEM.md              # Design system: tokens, tipografia e componentes
 └── Padroes de Commit.md          # Convenção de commits do projeto
 ```
 
 ### Manifesto da base de dados
 
-A aplicação carrega os parquets listados em `data/manifest.json`, na ordem em que aparecem:
+Cada página carrega os parquets listados no `manifest.json` da sua própria pasta `data/`, na ordem em que aparecem:
 
 ```json
 [
-  "imagens_base64_1.parquet",
-  "CWP-001-ISOLADAS.parquet"
+  "Lista de Imagens - Contexto.parquet",
+  "Lista de Imagens - Isoladas.parquet"
 ]
 ```
 
@@ -144,7 +146,7 @@ Tokens de cor, tipografia e regras de uso estão documentados em [`DESIGN-SYSTEM
 | [hyparquet](https://github.com/hyparam/hyparquet) | Leitura de arquivos Parquet no browser |
 | [hyparquet-compressors](https://github.com/hyparam/hyparquet-compressors) | Suporte a compressão GZIP no Parquet |
 
-Ambas são carregadas via `import()` dinâmico do jsDelivr. Sem conexão à internet, a leitura do Parquet não funciona — use a base `data/pacotes-data.js` como alternativa offline (requer ajuste no `index.html`).
+Ambas são carregadas via `import()` dinâmico do jsDelivr. Sem conexão à internet, a leitura do Parquet não funciona — use o fallback manual (seleção de arquivos, ver seção acima).
 
 ---
 
