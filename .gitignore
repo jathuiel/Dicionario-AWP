@@ -1,8 +1,9 @@
-# Arquivo de dados bruto (98 MB — não versionar)
-Lista de Imagens.csv
+# Dados pesados (~890 MB) ficam fora do git — backup é via OneDrive
+data/*.parquet
+uploads/
 
-# Backups gerados localmente
-*.bak
-
-# Diretórios de ferramentas locais
-.claude/
+__pycache__/
+*.pyc
+*.db
+*.db-wal
+*.db-shm

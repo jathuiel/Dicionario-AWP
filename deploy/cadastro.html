@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Pacotes — Dicionário AWP</title>
+  <link rel="stylesheet" href="assets/awp.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <a class="logo" href="index.html">
+      <img src="assets/simbolo_verum_branco.png" alt="">
+       <b>Dicionário Pacotes<br> — AWP</b>
+    </a>
+    <div class="divisor"></div>
+    <nav>
+      <a href="index.html" style="animation:fadeUp .4s .1s ease both">
+        <span class="ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2" stroke="#fff" stroke-width="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2" stroke="#fff" stroke-width="1.4"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2" stroke="#fff" stroke-width="1.4"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.2" stroke="#fff" stroke-width="1.4"/></svg></span>
+        <span class="txt">Início</span>
+      </a>
+      <a class="ativo" href="cadastro.html" style="animation:fadeUp .4s .15s ease both">
+        <span class="ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6h10v7H3z" stroke="#fff" stroke-width="1.4"/><path d="M5 6V3h6v3M5 10h6" stroke="#fff" stroke-width="1.4"/></svg></span>
+        <span class="txt">Novo Pacote</span>
+      </a>
+      <a href="upload.html" style="animation:fadeUp .4s .2s ease both">
+        <span class="ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 10V2.5M4.5 6 8 2.5 11.5 6" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 10.5v3h11v-3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+        <span class="txt">Enviar Fotos</span>
+      </a>
+    </nav>
+  
+  </aside>
+
+  <main class="conteudo conteudo--estreito">
+
+    <div class="titulo-secao">
+      <h1>Cadastro de Pacotes</h1>
+      <small>Registre novos pacotes de trabalho seguindo a convenção do projeto</small>
+    </div>
+
+    <div class="painel" style="--d:.05s">
+      <h2>Novo pacote</h2>
+      <label for="codigo">Código completo do pacote</label>
+      <input id="codigo" placeholder="Ex.: KS-N103101-294-S-MT-CWP-001-IWP-042" autocomplete="off">
+      <label for="descricao">Descrição (opcional)</label>
+      <input id="descricao" placeholder="Ex.: Plataforma de acesso — nível 12m" autocomplete="off">
+      <button id="salvar">Cadastrar</button>
+      <div id="msg"></div>
+    </div>
+
+    <div class="painel" style="--d:.1s">
+      <h2>Importação em massa (XLSX)</h2>
+      <p class="ajuda">
+        Planilha com cabeçalho na linha 1: coluna <b>codigo</b> (obrigatória) e <b>descricao</b> (opcional).
+        Linhas inválidas ou duplicadas não impedem as demais.
+      </p>
+      <label for="planilha">Arquivo .xlsx</label>
+      <input id="planilha" type="file" accept=".xlsx">
+      <button id="importar">Importar</button>
+      <div id="msg-imp"></div>
+      <div id="rel-imp" class="ajuda" style="margin-top:8px"></div>
+    </div>
+
+    <div class="painel" style="--d:.15s">
+      <h2>IWPs cadastrados <small id="contagem"></small></h2>
+      <div class="filtros" style="display:grid;grid-template-columns:1fr 1fr 1fr 2fr auto;gap:8px;margin-top:12px;align-items:end">
+        <div><label for="f-cwa" style="margin-top:0">CWA</label><select id="f-cwa"><option value="">Todas</option></select></div>
+        <div><label for="f-cwp" style="margin-top:0">CWP</label><select id="f-cwp"><option value="">Todos</option></select></div>
+        <div><label for="f-disc" style="margin-top:0">Disciplina</label><select id="f-disc"><option value="">Todas</option></select></div>
+        <div><label for="f-busca" style="margin-top:0">Busca (código ou descrição)</label><input id="f-busca" placeholder="🔍 Pesquisar" autocomplete="off"></div>
+        <button id="f-limpar" style="margin-top:0;padding:10px 14px" title="Limpar filtros">⇄</button>
+      </div>
+      <div style="overflow-x:auto;margin-top:10px">
+        <table id="tabela" hidden>
+          <thead><tr><th>Código</th><th>CWA</th><th>CWP</th><th>IWP</th><th>Descrição</th><th>Status</th><th>Criado em</th><th></th></tr></thead>
+          <tbody id="linhas"></tbody>
+        </table>
+      </div>
+      <div id="vazio">Nenhum IWP cadastrado ainda.</div>
+    </div>
+
+    <div class="painel" style="--d:.2s">
+      <h2>Disciplinas</h2>
+      <p class="ajuda">
+        Código = 4º segmento do IWP; o nome aparece nos dicionários.
+        Salvar com um código existente edita o nome.
+      </p>
+      <div style="display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:end">
+        <div><label for="d-codigo">Código</label><input id="d-codigo" maxlength="5" placeholder="Ex.: S" autocomplete="off"></div>
+        <div><label for="d-nome">Nome</label><input id="d-nome" placeholder="Ex.: Estruturas Metálicas" autocomplete="off"></div>
+        <button id="d-salvar" style="margin-top:0">Salvar</button>
+      </div>
+      <div id="msg-disc"></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Código</th><th>Nome</th><th></th></tr></thead>
+        <tbody id="linhas-disc"></tbody>
+      </table>
+    </div>
+
+    <div class="painel" id="squads" style="--d:.25s">
+      <h2>Squads</h2>
+      <p class="ajuda">
+        Cria a pasta do squad, o manifesto e a página do dicionário (mesmo modelo dos existentes).
+        As imagens entram depois pela página de Upload.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:end">
+        <div><label for="s-nome">Nome do squad</label><input id="s-nome" placeholder="Ex.: Usina" autocomplete="off"></div>
+        <div><label for="s-icone">Ícone</label><input id="s-icone" maxlength="4" placeholder="📦" autocomplete="off"></div>
+        <button id="s-criar" style="margin-top:0">Criar</button>
+      </div>
+      <div id="msg-squad"></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Squad</th><th>Pasta</th><th>Página</th><th></th></tr></thead>
+        <tbody id="linhas-squad"></tbody>
+      </table>
+    </div>
+
+    <div class="painel" id="gestao" style="--d:.3s">
+      <h2>Gestão</h2>
+      <p class="ajuda">
+        Projetos, CWAs, CWPs e Status compõem a hierarquia usada pelos IWPs
+        (projeto → CWA → CWP → IWP). Disciplinas e Squads estão nas seções acima.
+      </p>
+
+      <h3>Projetos</h3>
+      <div style="display:grid;grid-template-columns:160px 1fr auto;gap:8px;align-items:end">
+        <div><label for="p-codigo">Código</label><input id="p-codigo" placeholder="Ex.: KS-N103101" autocomplete="off"></div>
+        <div><label for="p-nome">Nome</label><input id="p-nome" placeholder="Ex.: Usina S11D" autocomplete="off"></div>
+        <button id="p-criar" style="margin-top:0">Criar</button>
+      </div>
+      <div id="msg-proj"></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Código</th><th>Nome</th><th></th></tr></thead>
+        <tbody id="linhas-proj"></tbody>
+      </table>
+
+      <h3 style="margin-top:24px">CWAs</h3>
+      <div style="display:grid;grid-template-columns:1fr 100px 2fr auto;gap:8px;align-items:end">
+        <div><label for="cwa-projeto">Projeto</label><select id="cwa-projeto"></select></div>
+        <div><label for="cwa-codigo">Código</label><input id="cwa-codigo" placeholder="Ex.: 294" autocomplete="off"></div>
+        <div><label for="cwa-desc">Descrição</label><input id="cwa-desc" autocomplete="off"></div>
+        <button id="cwa-criar" style="margin-top:0">Criar</button>
+      </div>
+      <div id="msg-cwa"></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Projeto</th><th>Código</th><th>Squad</th><th>Descrição</th><th></th></tr></thead>
+        <tbody id="linhas-cwa"></tbody>
+      </table>
+
+      <h3 style="margin-top:24px">CWPs</h3>
+      <p class="ajuda">CWPs nascem automaticamente do cadastro de IWP; aqui só edição da descrição e exclusão.</p>
+      <table style="margin-top:10px">
+        <thead><tr><th>CWA</th><th>Disciplina</th><th>Código</th><th>Descrição</th><th></th></tr></thead>
+        <tbody id="linhas-cwp"></tbody>
+      </table>
+
+      <h3 style="margin-top:24px">Status</h3>
+      <div style="display:grid;grid-template-columns:1fr 100px auto;gap:8px;align-items:end">
+        <div><label for="st-nome">Nome</label><input id="st-nome" placeholder="Ex.: Planejado" autocomplete="off"></div>
+        <div><label for="st-ordem">Ordem</label><input id="st-ordem" type="number" value="0"></div>
+        <button id="st-criar" style="margin-top:0">Criar</button>
+      </div>
+      <div id="msg-status"></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Ordem</th><th>Nome</th><th></th></tr></thead>
+        <tbody id="linhas-status"></tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    // Escapa HTML antes de inserir texto vindo do banco na tabela.
+    const esc = s => String(s).replace(/[&<>"']/g,
+      c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    // Preenche os selects de filtro com os valores distintos do banco,
+    // preservando a seleção atual.
+    async function carregarFiltros() {
+      const f = await (await fetch('api/iwp/filtros')).json();
+      for (const [campo, id] of [['cwa','f-cwa'], ['cwp','f-cwp'], ['disc','f-disc']]) {
+        const sel = $(id), atual = sel.value;
+        sel.length = 1; // mantém só a opção "Todas/Todos"
+        f[campo].forEach(v => sel.add(new Option(v, v)));
+        sel.value = atual;
+      }
+    }
+
+    let DADOS = []; // última consulta, para a edição de descrição por índice
+    let STATUS = []; // status cadastrados, para o select de cada linha
+    const MAX_LINHAS = 200; // ponytail: corte de renderização; paginação real se o uso pedir
+
+    async function carregar() {
+      const q = new URLSearchParams({
+        cwa: $('f-cwa').value, cwp: $('f-cwp').value,
+        disc: $('f-disc').value, busca: $('f-busca').value.trim()
+      });
+      const r = await fetch('api/iwp?' + q);
+      const dados = await r.json();
+      DADOS = dados;
+      carregarFiltros();
+      $('contagem').textContent = dados.length > MAX_LINHAS
+        ? `mostrando ${MAX_LINHAS} de ${dados.length} registros — refine os filtros`
+        : dados.length + ' registro(s)';
+      $('tabela').hidden = dados.length === 0;
+      $('vazio').hidden  = dados.length > 0;
+      $('linhas').innerHTML = dados.slice(0, MAX_LINHAS).map((d, i) => `
+        <tr>
+          <td class="cod">${esc(d.codigo)}</td>
+          <td>${esc(d.cwa)}</td>
+          <td>${esc(d.cwp)}</td>
+          <td>${esc(d.iwp)}</td>
+          <td>${esc(d.descricao)}
+            <button class="mini" title="Editar descrição" onclick="editarDescricao(${i})">✏️</button></td>
+          <td>
+            <select onchange="mudarStatus('${esc(d.codigo)}', this.value)">
+              <option value="">—</option>
+              ${STATUS.map(s => `<option value="${s.id}" ${s.nome === d.status ? 'selected' : ''}>${esc(s.nome)}</option>`).join('')}
+            </select>
+          </td>
+          <td>${esc(d.criado_em)}</td>
+          <td><button class="mini" title="Excluir" onclick="excluirIwp('${esc(d.codigo)}')">🗑️</button></td>
+        </tr>`).join('');
+    }
+
+    async function editarDescricao(i) {
+      const d = DADOS[i];
+      const nova = prompt('Descrição de ' + d.codigo + ':', d.descricao);
+      if (nova === null) return; // cancelou
+      const r = await fetch('api/iwp/' + encodeURIComponent(d.codigo), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descricao: nova })
+      });
+      if (r.ok) carregar();
+      else alert('Erro ao salvar: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function mudarStatus(codigo, statusId) {
+      const r = await fetch('api/iwp/' + encodeURIComponent(codigo), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status_id: statusId ? Number(statusId) : null })
+      });
+      if (r.ok) carregar();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function excluirIwp(codigo) {
+      if (!confirm('Excluir o IWP ' + codigo + '? As imagens não são apagadas.')) return;
+      const r = await fetch('api/iwp/' + encodeURIComponent(codigo), { method: 'DELETE' });
+      if (r.ok) carregar();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    /* ---------------- Disciplinas ---------------- */
+
+    async function carregarDisciplinas() {
+      const dados = await (await fetch('api/disciplinas')).json();
+      $('linhas-disc').innerHTML = dados.map(d => `
+        <tr>
+          <td class="cod">${esc(d.codigo)}</td>
+          <td>${esc(d.nome)}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="mini" title="Editar" onclick="preencherDisciplina('${esc(d.codigo)}')">✏️</button>
+            <button class="mini" title="Excluir" onclick="excluirDisciplina('${esc(d.codigo)}')">🗑️</button>
+          </td>
+        </tr>`).join('');
+      return dados;
+    }
+
+    let DISCS = [];
+    carregarDisciplinas().then(d => DISCS = d);
+
+    function preencherDisciplina(codigo) {
+      const d = DISCS.find(x => x.codigo === codigo);
+      $('d-codigo').value = codigo;
+      $('d-nome').value = d ? d.nome : '';
+      $('d-nome').focus();
+    }
+
+    $('d-salvar').onclick = async () => {
+      const msg = $('msg-disc');
+      msg.className = ''; msg.textContent = 'Salvando...';
+      const r = await fetch('api/disciplinas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo: $('d-codigo').value, nome: $('d-nome').value })
+      });
+      const corpo = await r.json();
+      if (r.ok) {
+        msg.className = 'ok'; msg.textContent = '✔ Salva: ' + corpo.codigo + ' — ' + corpo.nome;
+        $('d-codigo').value = ''; $('d-nome').value = '';
+        DISCS = await carregarDisciplinas();
+      } else {
+        msg.className = 'erro'; msg.textContent = '✖ ' + (corpo.detail || 'Erro ao salvar');
+      }
+    };
+
+    async function excluirDisciplina(codigo) {
+      if (!confirm('Excluir a disciplina ' + codigo + '?')) return;
+      const r = await fetch('api/disciplinas/' + encodeURIComponent(codigo), { method: 'DELETE' });
+      if (r.ok) DISCS = await carregarDisciplinas();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    /* ---------------- Squads ---------------- */
+
+    async function carregarSquads() {
+      const dados = await (await fetch('api/squads', { cache: 'no-store' })).json();
+      $('linhas-squad').innerHTML = dados.map(s => `
+        <tr>
+          <td class="cod">${esc(s.icone || '📦')} ${esc(s.nome)}</td>
+          <td>${esc(s.pasta)}</td>
+          <td><a href="${esc(s.pasta)}/${esc(s.pasta)}.html" target="_blank">abrir ↗</a></td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="mini" title="Editar" onclick="editarSquad(${s.id}, '${esc(s.nome)}', '${esc(s.icone || '📦')}')">✏️</button>
+            <button class="mini" title="Excluir" onclick="excluirSquad(${s.id})">🗑️</button>
+          </td>
+        </tr>`).join('');
+      return dados;
+    }
+    carregarSquads();
+
+    $('s-criar').onclick = async () => {
+      const msg = $('msg-squad');
+      msg.className = ''; msg.textContent = 'Criando...';
+      const r = await fetch('api/squads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: $('s-nome').value, icone: $('s-icone').value || '📦' })
+      });
+      const corpo = await r.json();
+      if (r.ok) {
+        msg.className = 'ok';
+        msg.textContent = '✔ Squad criado — página ' + corpo.pagina;
+        $('s-nome').value = ''; $('s-icone').value = '';
+        carregarSquads();
+      } else {
+        msg.className = 'erro'; msg.textContent = '✖ ' + (corpo.detail || 'Erro ao criar');
+      }
+    };
+
+    async function editarSquad(id, nomeAtual, iconeAtual) {
+      const nome = prompt('Nome do squad:', nomeAtual);
+      if (nome === null) return;
+      const icone = prompt('Ícone:', iconeAtual);
+      if (icone === null) return;
+      const r = await fetch('api/squads/' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, icone })
+      });
+      if (r.ok) carregarSquads();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function excluirSquad(id) {
+      if (!confirm('Excluir squad? A pasta e as imagens ficam no disco.')) return;
+      const r = await fetch('api/squads/' + id, { method: 'DELETE' });
+      if (r.ok) carregarSquads();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    $('salvar').onclick = async () => {
+      const msg = $('msg');
+      msg.className = ''; msg.textContent = 'Salvando...';
+      try {
+        const r = await fetch('api/iwp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo: $('codigo').value, descricao: $('descricao').value })
+        });
+        const corpo = await r.json();
+        if (r.ok) {
+          msg.className = 'ok';
+          msg.textContent = '✔ Cadastrado: ' + corpo.codigo;
+          $('codigo').value = ''; $('descricao').value = '';
+          carregar();
+        } else {
+          msg.className = 'erro';
+          msg.textContent = '✖ ' + (corpo.detail || 'Erro ao cadastrar');
+        }
+      } catch (e) {
+        msg.className = 'erro';
+        msg.textContent = '✖ Falha de rede (servidor no ar?): ' + e.message;
+      }
+    };
+
+    // Enter no campo código também salva.
+    $('codigo').addEventListener('keydown', e => { if (e.key === 'Enter') $('salvar').click(); });
+
+    // Filtros: selects recarregam na hora; busca filtra enquanto digita.
+    ['f-cwa', 'f-cwp', 'f-disc'].forEach(id => $(id).onchange = carregar);
+    $('f-busca').oninput = carregar;
+    $('f-limpar').onclick = () => {
+      ['f-cwa', 'f-cwp', 'f-disc', 'f-busca'].forEach(id => $(id).value = '');
+      carregar();
+    };
+
+    $('importar').onclick = async () => {
+      const msg = $('msg-imp'), rel = $('rel-imp');
+      const arq = $('planilha').files[0];
+      if (!arq) { msg.className = 'erro'; msg.textContent = '✖ Selecione um arquivo .xlsx.'; return; }
+
+      const form = new FormData();
+      form.append('arquivo', arq);
+      $('importar').disabled = true;
+      msg.className = ''; msg.textContent = 'Importando...'; rel.innerHTML = '';
+      try {
+        const r = await fetch('api/importar', { method: 'POST', body: form });
+        const c = await r.json();
+        if (r.ok) {
+          msg.className = 'ok';
+          msg.textContent = `✔ ${c.importados} importado(s), ${c.duplicados.length} duplicado(s), ${c.invalidos.length} inválido(s)`;
+          rel.innerHTML =
+            c.duplicados.map(d => `Linha ${d.linha}: duplicado — ${esc(d.codigo)}`).concat(
+            c.invalidos.map(i => `Linha ${i.linha}: ${esc(i.motivo)} — ${esc(i.codigo)}`)).join('<br>');
+          $('planilha').value = '';
+          carregar();
+        } else {
+          msg.className = 'erro';
+          msg.textContent = '✖ ' + (c.detail || 'Erro na importação');
+        }
+      } catch (e) {
+        msg.className = 'erro';
+        msg.textContent = '✖ Falha de rede: ' + e.message;
+      } finally {
+        $('importar').disabled = false;
+      }
+    };
+
+    /* ---------------- Gestão: Projetos ---------------- */
+
+    async function carregarProjetos() {
+      const dados = await (await fetch('api/projetos')).json();
+      $('linhas-proj').innerHTML = dados.map(p => `
+        <tr>
+          <td class="cod">${esc(p.codigo)}</td>
+          <td>${esc(p.nome)}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="mini" title="Editar nome" onclick="editarProjeto(${p.id}, '${esc(p.nome)}')">✏️</button>
+            <button class="mini" title="Excluir" onclick="excluirProjeto(${p.id})">🗑️</button>
+          </td>
+        </tr>`).join('');
+      const sel = $('cwa-projeto'), atual = sel.value;
+      sel.innerHTML = dados.map(p => `<option value="${p.id}">${esc(p.codigo)} — ${esc(p.nome)}</option>`).join('');
+      if (atual) sel.value = atual;
+      return dados;
+    }
+    carregarProjetos();
+
+    $('p-criar').onclick = async () => {
+      const msg = $('msg-proj');
+      msg.className = ''; msg.textContent = 'Salvando...';
+      const r = await fetch('api/projetos', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo: $('p-codigo').value, nome: $('p-nome').value })
+      });
+      const c = await r.json();
+      if (r.ok) {
+        msg.className = 'ok'; msg.textContent = '✔ Criado: ' + c.codigo;
+        $('p-codigo').value = ''; $('p-nome').value = '';
+        carregarProjetos();
+      } else {
+        msg.className = 'erro'; msg.textContent = '✖ ' + (c.detail || 'Erro ao criar');
+      }
+    };
+
+    async function editarProjeto(id, nomeAtual) {
+      const nome = prompt('Nome do projeto:', nomeAtual);
+      if (nome === null) return;
+      const r = await fetch('api/projetos/' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome })
+      });
+      if (r.ok) carregarProjetos();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function excluirProjeto(id) {
+      if (!confirm('Excluir projeto?')) return;
+      const r = await fetch('api/projetos/' + id, { method: 'DELETE' });
+      if (r.ok) carregarProjetos();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    /* ---------------- Gestão: CWAs ---------------- */
+
+    async function carregarCwas() {
+      const [dados, projetos, squads] = await Promise.all([
+        (await fetch('api/cwas')).json(),
+        (await fetch('api/projetos')).json(),
+        (await fetch('api/squads')).json(),
+      ]);
+      const codProjeto = id => (projetos.find(p => p.id === id) || {}).codigo || id;
+      $('linhas-cwa').innerHTML = dados.map(c => `
+        <tr>
+          <td>${esc(codProjeto(c.projeto_id))}</td>
+          <td class="cod">${esc(c.codigo)}</td>
+          <td>
+            <select onchange="atribuirSquad(${c.id}, this.value)">
+              <option value="">—</option>
+              ${squads.map(s => `<option value="${s.id}" ${s.id === c.squad_id ? 'selected' : ''}>${esc(s.nome)}</option>`).join('')}
+            </select>
+          </td>
+          <td>${esc(c.descricao)}
+            <button class="mini" title="Editar descrição" onclick="editarCwaDesc(${c.id}, '${esc(c.descricao)}')">✏️</button></td>
+          <td style="text-align:right"><button class="mini" title="Excluir" onclick="excluirCwa(${c.id})">🗑️</button></td>
+        </tr>`).join('');
+    }
+    carregarCwas();
+
+    $('cwa-criar').onclick = async () => {
+      const msg = $('msg-cwa');
+      msg.className = ''; msg.textContent = 'Salvando...';
+      const r = await fetch('api/cwas', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projeto_id: Number($('cwa-projeto').value),
+          codigo: $('cwa-codigo').value, descricao: $('cwa-desc').value
+        })
+      });
+      const c = await r.json();
+      if (r.ok) {
+        msg.className = 'ok'; msg.textContent = '✔ CWA criada: ' + c.codigo;
+        $('cwa-codigo').value = ''; $('cwa-desc').value = '';
+        carregarCwas();
+      } else {
+        msg.className = 'erro'; msg.textContent = '✖ ' + (c.detail || 'Erro ao criar');
+      }
+    };
+
+    async function atribuirSquad(id, squadId) {
+      const r = await fetch('api/cwas/' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ squad_id: squadId ? Number(squadId) : null })
+      });
+      if (!r.ok) alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function editarCwaDesc(id, atual) {
+      const descricao = prompt('Descrição da CWA:', atual);
+      if (descricao === null) return;
+      const r = await fetch('api/cwas/' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ descricao })
+      });
+      if (r.ok) carregarCwas();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function excluirCwa(id) {
+      if (!confirm('Excluir CWA?')) return;
+      const r = await fetch('api/cwas/' + id, { method: 'DELETE' });
+      if (r.ok) carregarCwas();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    /* ---------------- Gestão: CWPs (só edição/exclusão — nascem do IWP) ---------------- */
+
+    async function carregarCwps() {
+      const [dados, cwas, discs] = await Promise.all([
+        (await fetch('api/cwps')).json(),
+        (await fetch('api/cwas')).json(),
+        (await fetch('api/disciplinas')).json(),
+      ]);
+      const codCwa = id => (cwas.find(c => c.id === id) || {}).codigo || id;
+      const nomeDisc = id => (discs.find(d => d.id === id) || {}).nome || id;
+      $('linhas-cwp').innerHTML = dados.map(c => `
+        <tr>
+          <td>${esc(codCwa(c.cwa_id))}</td>
+          <td>${esc(nomeDisc(c.disciplina_id))}</td>
+          <td class="cod">${esc(c.codigo)}</td>
+          <td>${esc(c.descricao)}
+            <button class="mini" title="Editar" onclick="editarCwp(${c.id}, '${esc(c.descricao)}')">✏️</button></td>
+          <td style="text-align:right"><button class="mini" title="Excluir" onclick="excluirCwp(${c.id})">🗑️</button></td>
+        </tr>`).join('');
+    }
+    carregarCwps();
+
+    async function editarCwp(id, atual) {
+      const descricao = prompt('Descrição do CWP:', atual);
+      if (descricao === null) return;
+      const r = await fetch('api/cwps/' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ descricao })
+      });
+      if (r.ok) carregarCwps();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function excluirCwp(id) {
+      if (!confirm('Excluir CWP?')) return;
+      const r = await fetch('api/cwps/' + id, { method: 'DELETE' });
+      if (r.ok) carregarCwps();
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    /* ---------------- Gestão: Status ---------------- */
+
+    async function carregarStatus() {
+      const dados = await (await fetch('api/status')).json();
+      $('linhas-status').innerHTML = dados.map(s => `
+        <tr>
+          <td>${s.ordem}</td>
+          <td class="cod">${esc(s.nome)}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="mini" title="Editar" onclick="editarStatus(${s.id}, '${esc(s.nome)}', ${s.ordem})">✏️</button>
+            <button class="mini" title="Excluir" onclick="excluirStatus(${s.id})">🗑️</button>
+          </td>
+        </tr>`).join('');
+      return dados;
+    }
+
+    $('st-criar').onclick = async () => {
+      const msg = $('msg-status');
+      msg.className = ''; msg.textContent = 'Salvando...';
+      const r = await fetch('api/status', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: $('st-nome').value, ordem: Number($('st-ordem').value) || 0 })
+      });
+      const c = await r.json();
+      if (r.ok) {
+        msg.className = 'ok'; msg.textContent = '✔ Criado: ' + c.nome;
+        $('st-nome').value = ''; $('st-ordem').value = '0';
+        STATUS = await carregarStatus();
+        carregar(); // atualiza os selects de status da tabela de IWPs
+      } else {
+        msg.className = 'erro'; msg.textContent = '✖ ' + (c.detail || 'Erro ao criar');
+      }
+    };
+
+    async function editarStatus(id, nomeAtual, ordemAtual) {
+      const nome = prompt('Nome do status:', nomeAtual);
+      if (nome === null) return;
+      const ordem = prompt('Ordem:', ordemAtual);
+      if (ordem === null) return;
+      const r = await fetch('api/status/' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, ordem: Number(ordem) || 0 })
+      });
+      if (r.ok) { STATUS = await carregarStatus(); carregar(); }
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    async function excluirStatus(id) {
+      if (!confirm('Excluir status? Os IWPs com esse status ficam sem status.')) return;
+      const r = await fetch('api/status/' + id, { method: 'DELETE' });
+      if (r.ok) { STATUS = await carregarStatus(); carregar(); }
+      else alert('Erro: ' + ((await r.json()).detail || r.status));
+    }
+
+    // Status precisa estar carregado antes da 1ª renderização da tabela de
+    // IWPs (usa STATUS para montar o select de cada linha).
+    (async () => {
+      STATUS = await carregarStatus();
+      carregar();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1219 @@
+/* =========================================================================
+   AWP — folha única do Dicionário Visual AWP
+   Fonte visual: "Redesign AWP - Standalone.html" — opção 1a (corporativo refinado)
+
+   Estrutura:
+     1. Tokens (paleta teal do admin + contrato --brand-/--neutral- do leitor)
+     2. Base comum (reset, body, animações)
+     3. Páginas admin — index.html, cadastro.html, upload.html
+     4. Leitor de squads — {squad}/{squad}.html usa <body class="leitor">
+   Colisões de nome entre admin e leitor são resolvidas por escopo:
+   body.leitor, .topo-busca .busca, .grid .painel, .painel input/button.
+   ========================================================================= */
+:root {
+  /* --- Paleta teal (admin) --- */
+  --teal-bright: #00a99d;   /* realce, barras, foco */
+  --teal:        #007e7a;   /* cor primária — botões, links */
+  --teal-dark:   #045c55;   /* hover de botão, fim do degradê */
+  --teal-ink:    #0b3b37;   /* títulos e valores */
+  --teal-tint:   #e3f5f3;   /* fundos de destaque */
+
+  /* --- Neutros --- */
+  --texto:       #5f7573;   /* texto corrente */
+  --texto-forte: #33504d;   /* texto de células e itens */
+  --cinza:       #7d9291;   /* rótulos secundários */
+  --cinza-claro: #93a5a5;   /* placeholders e legendas */
+  --fundo:       #f2f4f5;   /* fundo geral */
+  --borda:       #e2e8e8;   /* borda de cards */
+  --borda-input: #dde3e4;   /* borda de inputs e botões secundários */
+  --borda-suave: #eef2f2;   /* divisórias internas */
+
+  /* --- Status --- */
+  --verde:    #0d9e74;
+  --verde-bg: #e5f6ef;
+  --erro:     #b3261e;
+  --amarelo:     #b45309;  --amarelo-bg: #fef3c7;   /* avisos */
+  --roxo:        #6d28d9;  --roxo-bg:    #ede9fe;   /* destaque reservado */
+
+  /* --- Degradês e sombras --- */
+  --grad-sidebar: linear-gradient(168deg, #00a99d 0%, #0b7d74 45%, #045c55 100%);
+  --sombra-card:       0 1px 2px rgba(4,92,85,.05), 0 10px 22px rgba(4,92,85,.05);
+  --sombra-card-hover: 0 4px 8px rgba(4,92,85,.08), 0 18px 34px rgba(4,92,85,.16);
+
+  --mono: ui-monospace, Menlo, Consolas, monospace;
+
+  /* --- Contrato --brand- e --neutral- (leitor; também usado em estilos inline) --- */
+  --brand-gradientv: linear-gradient(168deg, #00a99d 0%, #0b7d74 45%, #045c55 100%);
+  --brand-gradienth: linear-gradient(90deg,  #00a99d 0%, #0b7d74 55%, #045c55 100%);
+  --brand-bright:        #00a99d;
+  --brand-primary:       #0d7d75;
+  --brand-primary-dark:  #045c55;
+  --brand-primary-light: #e3f5f3;
+  --brand-primary-alpha: #0d7d7533;
+  --brand-accent:        #00a99d;
+  --brand-accent-light:  #e3f5f3;
+  --neutral-gray:   #7d9291;
+  --neutral-bg:     #f2f4f5;
+  --neutral-border: #e2e8e8;
+  --neutral-black:  #0b3b37;
+  --neutral-white:  #ffffff;
+}
+
+/* =========================================================================
+   BASE COMUM
+   ========================================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  background: var(--fundo);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: var(--texto);
+}
+/* Leitor: layout em 3 colunas com scroll interno por painel */
+body.leitor { height: 100vh; overflow: hidden; }
+
+a { color: var(--teal); text-decoration: none; }
+a:hover { color: var(--teal-dark); }
+
+:focus-visible { outline: 2px solid var(--teal-bright); outline-offset: 2px; }
+
+@keyframes fadeUp    { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes slideIn   { from { opacity: 0; transform: translateX(-10px); }           to { opacity: 1; transform: none; } }
+@keyframes growWidth { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes drawLine  { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes popIn     { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulseDot  { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes glowPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,169,157,.35); } 50% { box-shadow: 0 0 0 6px rgba(0,169,157,0); } }
+@keyframes pulse     { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* =========================================================================
+   SIDEBAR (compartilhada — admin usa <nav>, leitor usa .nav)
+   ========================================================================= */
+.sidebar {
+  width: 232px;
+  flex: none;
+  background: var(--grad-sidebar);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  animation: slideIn .5s ease both;
+}
+.sidebar .card { display: block; text-decoration: none; color: inherit; }
+.sidebar .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px 24px;
+  color: #fff;
+}
+.sidebar .logo img { width: 30px; height: 30px; object-fit: contain; }
+.sidebar .logo b { font-size: 15px; font-weight: 700; line-height: 1.25; }
+.sidebar .divisor { height: 1px; background: rgba(255,255,255,.18); margin: 0 16px 14px; }
+/* Leitor: logo dentro do container .ico (sidebar e header mobile) */
+.sidebar .logo .ico {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar .logo .ico img,
+.header-mobile .ico img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+/* Itens de navegação (pills) — admin (<nav>) e leitor (.nav) */
+.sidebar nav, .nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+.sidebar nav a, .nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: rgba(255,255,255,.85);
+  text-decoration: none;
+  transition: background .2s, transform .2s;
+}
+.sidebar nav a:hover:not(.ativo), .nav a:hover:not(.ativo) {
+  background: rgba(255,255,255,.1);
+  transform: translateX(3px);
+  color: #fff;
+}
+.sidebar nav a.ativo, .nav a.ativo {
+  background: rgba(255,255,255,.16);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.sidebar nav .ico { width: 16px; flex: none; display: flex; }
+.nav .ico { width: 20px; text-align: center; flex-shrink: 0; }
+
+.sidebar .rodape { margin-top: auto; padding: 16px 22px; font-size: 11.5px; color: rgba(255,255,255,.65); }
+body.leitor .sidebar .rodape { display: flex; align-items: center; gap: 10px; }
+
+/* =========================================================================
+   ADMIN — ÁREA DE CONTEÚDO (index, cadastro, upload)
+   ========================================================================= */
+.conteudo {
+  flex: 1;
+  min-width: 0;
+  padding: 26px 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.conteudo--estreito { max-width: 960px; }
+
+/* Título de seção com sublinhado animado */
+.titulo-secao { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.titulo-secao h1 {
+  position: relative;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--teal-ink);
+}
+.titulo-secao h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 100%;
+  background: var(--teal-bright);
+  transform-origin: left;
+  animation: drawLine .6s .3s cubic-bezier(.2,.8,.2,1) both;
+}
+.titulo-secao small { font-size: 12.5px; color: var(--cinza); }
+
+/* Barra de busca (admin — a do leitor é .topo-busca .busca, mais abaixo) */
+.busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--borda-input);
+  border-radius: 10px;
+  padding: 11px 16px;
+  box-shadow: 0 1px 2px rgba(4,92,85,.05), 0 8px 20px rgba(4,92,85,.05);
+  transition: box-shadow .25s, border-color .25s;
+  animation: fadeUp .5s ease both;
+}
+.busca:focus-within { border-color: var(--teal-bright); box-shadow: 0 2px 4px rgba(4,92,85,.08), 0 14px 32px rgba(4,92,85,.14); }
+.busca input { flex: 1; border: none; background: none; outline: none; font-size: 13.5px; color: var(--teal-ink); padding: 0; }
+.busca input::placeholder { color: var(--cinza-claro); }
+
+/* ---- KPIs (cards de indicadores) ---- */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kpi {
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: var(--sombra-card);
+  transition: box-shadow .25s, transform .25s;
+  animation: fadeUp .55s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay: var(--d, 0s);
+}
+.kpi:hover { box-shadow: var(--sombra-card-hover); transform: translateY(-4px); }
+.kpi .rotulo { font-size: 12px; font-weight: 600; color: var(--cinza); letter-spacing: .4px; text-transform: uppercase; }
+.kpi .valor  { font-size: 32px; font-weight: 700; color: var(--teal-ink); margin-top: 6px; }
+.kpi .sub    { font-size: 12px; color: var(--cinza-claro); margin-top: 2px; }
+
+/* ---- Cards de equipe (home) ---- */
+.equipes { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.equipe-card {
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: inherit;
+  transition: box-shadow .2s, transform .2s, border-color .2s;
+  animation: fadeUp .5s ease both;
+  animation-delay: var(--d, 0s);
+}
+.equipe-card:hover { box-shadow: 0 10px 24px rgba(4,92,85,.14); transform: translateY(-3px); border-color: var(--teal-bright); color: inherit; }
+.equipe-topo { display: flex; align-items: center; gap: 12px; }
+.equipe-ico {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--teal-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 3px 8px rgba(4,92,85,.1);
+  transition: transform .3s;
+}
+.equipe-card:hover .equipe-ico { transform: scale(1.08) rotate(-4deg); }
+.equipe-nome { font-size: 15px; font-weight: 700; color: var(--teal-ink); }
+.equipe-slug { font-size: 12px; color: var(--cinza-claro); font-family: var(--mono); }
+.equipe-stats { display: flex; gap: 14px; font-size: 12.5px; color: var(--texto); }
+.equipe-stats b { color: var(--teal-ink); }
+.equipe-barra { height: 4px; border-radius: 2px; background: var(--borda-suave); overflow: hidden; }
+.equipe-barra div {
+  height: 100%;
+  background: var(--teal-bright);
+  border-radius: 2px;
+  transform-origin: left;
+  animation: growWidth .8s .55s cubic-bezier(.2,.8,.2,1) both;
+}
+
+/* Card tracejado "Criar nova equipe" */
+.equipe-card--nova {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: none;
+  border: 1.5px dashed #b9cccb;
+  color: var(--cinza);
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.equipe-card--nova:hover {
+  border-color: var(--teal-bright);
+  color: var(--teal);
+  background: #f4faf9;
+  box-shadow: 0 10px 24px rgba(4,92,85,.1);
+  transform: none;
+}
+
+/* =========================================================================
+   ADMIN — PAINÉIS E FORMULÁRIOS (cadastro / upload)
+   label/input/button escopados a .painel para não vazar para o leitor.
+   ========================================================================= */
+.painel {
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: var(--sombra-card);
+  animation: fadeUp .5s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay: var(--d, 0s);
+  scroll-margin-top: 16px;
+}
+.painel h2 { font-size: 12px; font-weight: 700; color: var(--cinza); letter-spacing: .6px; text-transform: uppercase; }
+.painel h2 small { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--cinza-claro); }
+.painel .ajuda { font-size: 12.5px; color: var(--cinza-claro); margin-top: 6px; }
+
+/* Bloco de filtros (cadastro: grid via style inline; leitor: campos .campo) */
+.filtros { padding: 14px 16px; border-bottom: 1px solid var(--borda-suave); }
+
+.painel label { display: block; font-size: 12.5px; color: var(--cinza); margin: 14px 0 4px; }
+.painel input, .painel select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--borda-input);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--teal-ink);
+  background: #fff;
+  transition: border-color .2s, box-shadow .2s;
+}
+.painel input:focus, .painel select:focus { outline: none; border-color: var(--teal-bright); box-shadow: 0 0 0 3px rgba(0,169,157,.15); }
+
+.painel button {
+  margin-top: 18px;
+  padding: 9px 20px;
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(13,125,117,.3);
+  transition: background .2s, box-shadow .2s, transform .2s;
+}
+.painel button:hover  { background: var(--teal-dark); box-shadow: 0 8px 20px rgba(13,125,117,.4); transform: translateY(-1px); }
+.painel button:active { transform: scale(.96); }
+.painel button:disabled { opacity: .55; cursor: default; transform: none; box-shadow: none; }
+
+.painel button.mini {
+  margin: 0;
+  padding: 2px 8px;
+  background: none;
+  color: inherit;
+  border: 1px solid var(--borda-input);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.painel button.mini:hover { background: var(--teal-tint); border-color: var(--teal); color: var(--teal); box-shadow: none; transform: none; }
+
+/* Tabelas (admin) */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda-suave); }
+th { color: var(--cinza); font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+td { color: var(--texto-forte); }
+.cod { font-weight: 600; font-family: var(--mono); font-size: 12.5px; color: var(--teal-ink); }
+
+/* Mensagens de retorno (className é sobrescrito pelo JS — seletor por id) */
+#msg, #msg-imp, #msg-disc, #msg-squad { margin-top: 12px; font-size: 13.5px; min-height: 18px; }
+.ok   { color: var(--verde); }
+.erro { color: var(--erro); }
+
+#vazio { color: var(--cinza-claro); font-size: 13.5px; text-align: center; padding: 16px 0; }
+
+/* =========================================================================
+   ADMIN — MOBILE (< 768px): sidebar vira barra superior
+   (no leitor a sidebar é ocultada — ver bloco mobile do leitor)
+   ========================================================================= */
+@media (max-width: 767px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; flex-direction: row; align-items: center; padding: 10px 12px; gap: 4px; }
+  .sidebar .logo { padding: 0 8px 0 4px; }
+  .sidebar .logo b { font-size: 13px; }
+  .sidebar .logo b br { display: none; }
+  .sidebar .divisor { display: none; }
+  .sidebar nav { flex-direction: row; padding: 0; margin-left: auto; gap: 4px; }
+  .sidebar nav a { padding: 8px 10px; font-size: 12.5px; }
+  .sidebar nav a .txt { display: none; }
+  .sidebar .rodape { display: none; }
+  .conteudo { padding: 18px 16px; gap: 18px; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .kpi .valor { font-size: 26px; }
+}
+
+/* =========================================================================
+   LEITOR — COLUNA LISTA (equipe, busca, filtros, lista e paginação)
+   ========================================================================= */
+.coluna-lista {
+  width: 340px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid var(--neutral-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Cabeçalho da equipe (nome + contagens + indicador) */
+.equipe-cab {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--borda-suave);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.equipe-cab .volta {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid var(--neutral-border);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto);
+  font-size: 14px;
+  text-decoration: none;
+  transition: box-shadow .2s, transform .2s, color .2s;
+}
+.equipe-cab .volta:hover {
+  box-shadow: 0 4px 12px rgba(4,92,85,.15);
+  transform: translateX(-2px);
+  color: var(--brand-primary);
+}
+.equipe-cab b { display: block; font-size: 14.5px; font-weight: 700; color: var(--neutral-black); }
+.equipe-cab small { font-size: 11.5px; color: var(--cinza-claro); }
+.equipe-cab .dot {
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--verde);
+  animation: pulseDot 2s infinite, glowPulse 2s infinite;
+}
+
+/* Campo de busca do leitor (escopado — difere da .busca do admin) */
+.topo-busca { padding: 14px 16px; border-bottom: 1px solid var(--borda-suave); }
+.topo-busca .busca {
+  border: none;
+  border-radius: 8px;
+  background: var(--neutral-bg);
+  padding: 9px 12px;
+  gap: 8px;
+  box-shadow: none;
+  animation: none;
+}
+.topo-busca .busca input { font-size: 12.5px; color: var(--neutral-black); }
+
+/* Filtros (Área, CWP, Disciplina) */
+.filtros .cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.filtros .cab b { font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--cinza-claro); }
+.filtros .cab span { font-size: 12.5px; color: var(--brand-primary); cursor: pointer; }
+.campo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.campo label { min-width: 76px; font-size: 12.5px; color: var(--texto); }
+.campo select {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid var(--borda-input);
+  border-radius: 7px;
+  font-size: 12.5px;
+  background: #fff;
+  color: var(--texto);
+  outline: none;
+  cursor: pointer;
+  transition: box-shadow .2s, border-color .2s;
+}
+.campo select:hover,
+.campo select:focus { border-color: var(--brand-bright); box-shadow: 0 4px 12px rgba(4,92,85,.1); }
+
+/* Cabeçalho da lista (título + contagem de resultados) */
+.lista-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 20px 6px;
+}
+.lista-cab b { font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--cinza-claro); }
+.lista-cab small { font-size: 12px; color: var(--cinza-claro); animation: pulse 5s normal; }
+
+/* Área rolável com os cards */
+.lista { flex: 1; overflow-y: auto; padding: 0 12px 12px; }
+
+/* Card individual de pacote (entrada em cascata) */
+.lista .card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 2px;
+  border-left: 3px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+  animation: slideIn .3s ease both;
+}
+.lista .card:nth-child(2) { animation-delay: .04s; }
+.lista .card:nth-child(3) { animation-delay: .08s; }
+.lista .card:nth-child(4) { animation-delay: .12s; }
+.lista .card:nth-child(5) { animation-delay: .16s; }
+.lista .card:nth-child(6) { animation-delay: .2s; }
+.lista .card:hover:not(.sel) { background: var(--neutral-bg); }
+.lista .card.sel {
+  background: var(--brand-primary-light);
+  border-left-color: var(--brand-primary);
+  box-shadow: 0 4px 14px rgba(4,92,85,.1);
+}
+.card .cod { font-size: 12.5px; font-weight: 600; font-family: var(--mono); color: var(--texto-forte); }
+.card.sel .cod { color: var(--neutral-black); font-weight: 700; }
+.card .nome { margin: 3px 0 6px; font-size: 11.5px; color: var(--cinza-claro); }
+.card .disc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--brand-primary);
+}
+.card .disc::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+}
+
+/* Etiqueta de status */
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.tag.ativo { background: var(--verde-bg); color: var(--verde); }
+
+/* Controles de paginação */
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px;
+  border-top: 1px solid var(--borda-suave);
+}
+.paginacao button {
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid var(--borda-input);
+  background: #fff;
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--texto);
+  cursor: pointer;
+  transition: border-color .2s, color .2s, box-shadow .2s;
+}
+.paginacao button:hover:not(:disabled):not(.atual) {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  box-shadow: 0 4px 12px rgba(4,92,85,.1);
+}
+.paginacao button.atual {
+  background: var(--brand-primary);
+  color: #fff;
+  border-color: var(--brand-primary);
+  box-shadow: 0 4px 12px rgba(13,125,117,.3);
+}
+.paginacao button:disabled { opacity: .4; cursor: default; }
+
+/* =========================================================================
+   LEITOR — PAINEL DE DETALHE (área principal à direita)
+   ========================================================================= */
+.detalhe {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 30px;
+}
+
+/* "← Voltar" — botão secundário (usado também na aba impressão) */
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 7px 14px;
+  background: #fff;
+  border: 1px solid var(--borda-input);
+  border-radius: 7px;
+  color: var(--texto);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(4,92,85,.04);
+  transition: border-color .2s, color .2s, box-shadow .2s;
+}
+.voltar:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  box-shadow: 0 6px 16px rgba(4,92,85,.12);
+}
+
+/* Cabeçalho do detalhe (ícone + título + badges) */
+.det-cab {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+  animation: fadeUp .45s cubic-bezier(.2,.8,.2,1) both;
+}
+.det-cab .icone {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  background: var(--brand-primary-light);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 3px 8px rgba(4,92,85,.1);
+}
+.det-cab h1 {
+  font-size: 20px;
+  font-family: var(--mono);
+  color: var(--neutral-black);
+  margin-bottom: 4px;
+}
+.det-cab .sub { margin-bottom: 10px; color: var(--texto); font-size: 13.5px; }
+
+/* Badges informativos */
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge {
+  padding: 5px 11px;
+  font-size: 12px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid var(--neutral-border);
+  color: var(--texto);
+  animation: popIn .4s cubic-bezier(.3,1.3,.4,1) both;
+}
+.badge:nth-child(2) { animation-delay: .08s; }
+.badge:nth-child(3) { animation-delay: .16s; }
+.badge b { font-weight: 600; color: var(--neutral-black); }
+.badge.verde { background: var(--verde-bg); color: var(--verde); border: none; }
+
+/* Grade de painéis (informações + visualizador) — sobrepõe o .painel admin */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.grid .painel {
+  background: #fff;
+  border: 1px solid var(--neutral-border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--sombra-card);
+  animation: fadeUp .45s .05s cubic-bezier(.2,.8,.2,1) both;
+}
+.grid .painel h3 {
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--neutral-gray);
+}
+
+/* Linha de informação (rótulo à esquerda, valor à direita) */
+.info-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: 13.5px;
+}
+.info-linha .lbl { color: var(--cinza-claro); }
+.info-linha .val {
+  font-weight: 500;
+  color: var(--neutral-black);
+  text-align: right;
+  word-break: break-word;
+}
+
+/* ---- Galeria principal (visualizador) ---- */
+.visualizador {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16/10;
+  background: #fff;
+  border: 1px solid var(--borda-suave);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.visualizador img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; }
+
+/* Setas de navegação sobre a imagem */
+.nav-vista {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--neutral-border);
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 4px 12px rgba(4,92,85,.15);
+  font-size: 18px;
+  color: var(--texto);
+  cursor: pointer;
+  transition: color .2s, box-shadow .2s;
+}
+.nav-vista:hover { color: var(--brand-primary); box-shadow: 0 6px 16px rgba(4,92,85,.25); }
+.nav-vista.esq { left: 12px; }
+.nav-vista.dir { right: 12px; }
+
+/* Botões de navegação entre pacotes (painel de detalhe) */
+.nav-pacote {
+  padding: 7px 14px;
+  background: var(--brand-primary);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(13,125,117,.3);
+  transition: background .2s, box-shadow .2s, transform .2s;
+}
+.nav-pacote:hover {
+  background: var(--brand-primary-dark);
+  box-shadow: 0 8px 20px rgba(13,125,117,.4);
+  transform: translateY(-1px);
+}
+.nav-pacote:active { transform: scale(.96); }
+
+/* Etiqueta do nome da vista atual */
+.vista-label {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  padding: 5px 12px;
+  background: rgba(4,92,85,.85);
+  color: #fff;
+  font-size: 12.5px;
+  border-radius: 20px;
+}
+
+/* Linha com nome do arquivo + link original */
+.arquivo-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--cinza-claro);
+}
+
+/* Estado vazio (nenhum pacote selecionado) — o admin usa #vazio, por id */
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--neutral-gray);
+  text-align: center;
+  animation: fadeUp .5s ease both;
+}
+.vazio h2 { color: var(--neutral-black); }
+.vazio .big { margin-bottom: 14px; font-size: 48px; opacity: .4; }
+
+/* =========================================================================
+   LEITOR — LIGHTBOX (visualização da imagem em tela cheia)
+   ========================================================================= */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;                 /* exibido via .aberto */
+  align-items: center;
+  justify-content: center;
+  background: rgba(3,24,22,.93);
+}
+.lightbox.aberto { display: flex; }
+.lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.lightbox .fechar {
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+}
+.lightbox .lb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0 22px;
+  color: #fff;
+  font-size: 42px;
+  cursor: pointer;
+  user-select: none;
+}
+.lightbox .lb-nav.esq { left: 0; }
+.lightbox .lb-nav.dir { right: 0; }
+.lightbox .lb-cap {
+  position: absolute;
+  bottom: 24px;
+  padding: 6px 16px;
+  background: rgba(0,0,0,.4);
+  color: #fff;
+  font-size: 13px;
+  font-family: var(--mono);
+  border-radius: 20px;
+}
+
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* =========================================================================
+   LEITOR — ABA IMPRESSÃO (visibilidade via atributo data-aba do body)
+   ========================================================================= */
+body:not([data-aba="impressao"]) #area-impressao { display: none; }
+body[data-aba="impressao"] .coluna-lista,
+body[data-aba="impressao"] #detalhe              { display: none; }
+body[data-aba="impressao"] #area-impressao       { display: block; }
+
+.area-impressao {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--neutral-bg);
+  padding: 28px 32px;
+}
+
+.imp-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.imp-controles button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s, box-shadow .2s;
+}
+.imp-btn-print {
+  background: var(--brand-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(13,125,117,.3);
+}
+.imp-btn-print:hover { background: var(--brand-primary-dark); box-shadow: 0 8px 20px rgba(13,125,117,.4); }
+
+/* Botões de orientação */
+.imp-btn-orient {
+  background: #fff;
+  color: var(--texto);
+  border: 1px solid var(--borda-input) !important;
+}
+.imp-btn-orient:hover { border-color: var(--brand-primary) !important; color: var(--brand-primary); }
+.imp-btn-orient.ativo {
+  background: var(--brand-primary);
+  color: #fff;
+  border-color: var(--brand-primary) !important;
+}
+
+/* Folha paisagem (A4 horizontal) */
+.imp-pagina--paisagem { width: 297mm; min-height: 210mm; }
+.imp-pagina--paisagem .imp-galeria { grid-template-columns: repeat(3, 1fr); }
+
+/* Folha A4 simulada na tela */
+.imp-pagina {
+  background: #fff;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 18mm 20mm;
+  box-shadow: 0 4px 24px rgba(4,92,85,.18);
+  font-size: 13px;
+  color: var(--neutral-black);
+  animation: fadeUp .45s ease both;
+}
+
+.imp-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid var(--brand-primary);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+}
+.imp-topo h2   { font-size: 16px; font-family: var(--mono); margin-bottom: 2px; }
+.imp-topo .sub { font-size: 12px; color: var(--texto); }
+.imp-topo .data{ font-size: 12px; color: var(--texto); white-space: nowrap; }
+
+.imp-info { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.imp-info td { padding: 6px 10px; border: 1px solid var(--neutral-border); font-size: 13px; }
+.imp-info td:first-child {
+  width: 35%;
+  background: var(--neutral-bg);
+  font-weight: 600;
+  color: var(--neutral-black);
+}
+
+.imp-sec-titulo {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  color: var(--neutral-gray);
+  margin-bottom: 12px;
+}
+
+.imp-galeria { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.imp-vista { border: 1px solid var(--neutral-border); border-radius: 8px; overflow: hidden; }
+.imp-vista img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: contain;
+  background: var(--neutral-bg);
+  display: block;
+}
+.imp-vista .imp-cap {
+  padding: 5px 8px;
+  font-size: 11.5px;
+  color: var(--texto);
+  text-align: center;
+  border-top: 1px solid var(--borda-suave);
+}
+
+.imp-rodape {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid var(--neutral-border);
+  font-size: 11px;
+  color: var(--cinza-claro);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* =========================================================================
+   LEITOR — elementos exclusivos do mobile (ocultos em desktop)
+   ========================================================================= */
+.header-mobile { display: none; }
+.nav-bottom    { display: none; }
+
+/* =========================================================================
+   LEITOR — TABLET (768px – 1023px): sidebar recolhida a ícones
+   (escopado a body.leitor — no admin a sidebar fica na largura normal)
+   ========================================================================= */
+@media (max-width: 1023px) and (min-width: 768px) {
+  body.leitor .sidebar { width: 60px; overflow: hidden; }
+  body.leitor .sidebar .logo { justify-content: center; padding-left: 0; padding-right: 0; }
+  body.leitor .sidebar .logo b  { display: none; }
+  body.leitor .sidebar .rodape  { display: none; }
+  body.leitor .sidebar .logo .ico { width: 36px; height: 36px; }
+  .nav { padding: 0 8px; }
+  .nav a {
+    justify-content: center;
+    padding: 18px 0;
+    gap: 0;
+    font-size: 0;        /* oculta texto, mantém ícone */
+  }
+  .nav a .ico { font-size: 18px; }
+  .coluna-lista { width: 300px; }
+}
+
+/* =========================================================================
+   LEITOR — MOBILE (< 768px): layout em pilha, um painel por vez
+   (regras que colidem com o mobile do admin são escopadas a body.leitor)
+   ========================================================================= */
+@media (max-width: 767px) {
+  body.leitor { height: 100dvh; overflow: hidden; }
+
+  /* ---- Cabeçalho mobile ---- */
+  .header-mobile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    height: 52px;
+    flex-shrink: 0;
+    background: var(--brand-gradienth);
+    color: #fff;
+    z-index: 10;
+  }
+  .header-mobile .ico {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .header-mobile b { font-size: 14px; }
+
+  /* ---- Sidebar: oculta (o leitor navega pelo nav-bottom) ---- */
+  body.leitor .sidebar { display: none; }
+
+  /* ---- Lista: largura total, com espaço para nav inferior ---- */
+  .coluna-lista {
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    padding-bottom: 58px;
+  }
+
+  /* ---- Painel de detalhe: desliza da direita ---- */
+  .detalhe {
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    bottom: 58px;
+    z-index: 20;
+    background: var(--neutral-bg);
+    padding: 14px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform .3s ease;
+  }
+  body[data-sel] .detalhe                   { transform: translateX(0); }
+  body[data-aba="impressao"] .detalhe        { transform: translateX(100%); }
+
+  /* ---- Área de impressão: espaço para nav inferior ---- */
+  .area-impressao { padding: 16px 16px 74px; }
+  .imp-controles { flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+  .imp-pagina {
+    width: 100%;
+    min-height: unset;
+    padding: 12px;
+    font-size: 12px;
+  }
+  .imp-pagina--paisagem { width: 100%; min-height: unset; }
+  .imp-galeria,
+  .imp-pagina--paisagem .imp-galeria { grid-template-columns: 1fr; }
+
+  /* ---- Navegação inferior ---- */
+  .nav-bottom {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    z-index: 30;
+    background: var(--brand-gradienth);
+    border-top: 1px solid rgba(255,255,255,.12);
+  }
+  .nav-bottom a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: rgba(255,255,255,.6);
+    text-decoration: none;
+    font-size: 10px;
+    border-top: 2px solid transparent;
+  }
+  .nav-bottom a .ico { font-size: 18px; line-height: 1; }
+  .nav-bottom a.ativo { color: #fff; border-top-color: #fff; }
+
+  /* ---- Ajustes de conteúdo no detalhe ---- */
+  .det-cab { flex-direction: column; gap: 10px; }
+  .det-cab h1  { font-size: 17px; }
+  .det-cab .sub { font-size: 13px; }
+  .grid        { grid-template-columns: 1fr; }
+
+  /* ---- Filtros do leitor: campos em coluna ---- */
+  .campo { flex-direction: column; align-items: stretch; gap: 5px; }
+  .campo label  { min-width: unset; }
+  .campo select { width: 100%; }
+}
+
+/* =========================================================================
+   LEITOR — FASE 02: safe area, touch targets, gestos e micro-interações
+   ========================================================================= */
+
+/* Safe area insets — iOS com notch, Dynamic Island e home bar */
+@supports (padding: env(safe-area-inset-bottom)) {
+  @media (max-width: 767px) {
+    .nav-bottom {
+      height: calc(58px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .coluna-lista   { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
+    .detalhe        { bottom: calc(58px + env(safe-area-inset-bottom)); }
+    .area-impressao { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+    .header-mobile  { padding-top: env(safe-area-inset-top); height: calc(52px + env(safe-area-inset-top)); }
+    .detalhe        { top: calc(52px + env(safe-area-inset-top)); }
+  }
+}
+
+@media (max-width: 767px) {
+
+  /* ---- Touch targets mínimos 44px (Fitts' Law) ---- */
+  .lista .card      { min-height: 64px; }
+  .paginacao button { min-width: 44px; height: 44px; font-size: 14px; }
+  .nav-bottom a     { min-height: 44px; }
+  .voltar           { min-height: 44px; align-items: center; }
+
+  /* font-size 16px em inputs: previne zoom automático no iOS */
+  .busca input,
+  .campo select     { font-size: 16px; }
+
+  /* ---- Feedback visual no toque (sem hover no mobile) ---- */
+  .lista .card:active {
+    background: var(--brand-primary-light);
+    transform: scale(0.985);
+    transition: transform .1s ease, background .1s ease;
+  }
+  .nav-bottom a:active { opacity: .65; }
+  .paginacao button:active:not(:disabled) { background: var(--neutral-bg); }
+
+  /* ---- Filtros recolhíveis ---- */
+  .filtros-campos {
+    overflow: hidden;
+    max-height: 500px;
+    transition: max-height .3s ease;
+  }
+  .filtros--recolhido .filtros-campos { max-height: 0; }
+
+  .filtro-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+    color: var(--brand-primary);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    font-style: normal;
+  }
+  .filtro-toggle .chevron {
+    display: inline-block;
+    font-size: 14px;
+    transition: transform .25s ease;
+  }
+  .filtros--recolhido .filtro-toggle .chevron { transform: rotate(-90deg); }
+
+  /* ---- Indicador de swipe no painel de detalhe ---- */
+  .detalhe::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--neutral-border);
+    border-radius: 2px;
+    margin: 0 auto 14px;
+    flex-shrink: 0;
+  }
+}
+
+/* =========================================================================
+   @MEDIA PRINT — oculta tudo exceto a folha A4 (leitor)
+   ========================================================================= */
+@media print {
+  .sidebar, .coluna-lista, .imp-controles, .lightbox { display: none !important; }
+
+  body {
+    overflow: visible !important;
+    height: auto !important;
+    background: #fff !important;
+  }
+
+  .area-impressao {
+    display: block !important;
+    background: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .imp-pagina {
+    box-shadow: none !important;
+    width: 100% !important;
+    min-height: unset !important;
+    padding: 10mm !important;
+    margin: 0 !important;
+  }
+}

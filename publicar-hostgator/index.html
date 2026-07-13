@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dicionário Visual AWP — Squads</title>
+  <style>
+    :root {
+      --brand-primary: #007a7e;
+      --brand-gradient: linear-gradient(180deg, #01a39e, #007E7a 50%, #015551);
+      --neutral-black: #1A1A1A;
+      --neutral-gray: #77787B;
+      --neutral-bg: #F4F6F8;
+      --neutral-border: #E2E7F0;
+      --neutral-white: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      background: var(--neutral-bg);
+      font-family: 'Segoe UI semibold', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--neutral-black);
+      padding: 24px;
+    }
+    header { text-align: center; }
+    header h1 { margin: 0 0 6px; font-size: 24px; }
+    header p { margin: 0; color: var(--neutral-gray); font-size: 14.5px; }
+    .squads {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 18px;
+      max-width: 720px;
+    }
+    .card {
+      width: 260px;
+      padding: 28px 20px;
+      background: var(--neutral-white);
+      border: 1px solid var(--neutral-border);
+      border-radius: 14px;
+      text-decoration: none;
+      color: inherit;
+      text-align: center;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .card:not(.em-breve):hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,.08);
+    }
+    .card .ico {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: var(--brand-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .card b { display: block; font-size: 16px; margin-bottom: 4px; }
+    .card small { color: var(--neutral-gray); font-size: 12.5px; }
+    .card.em-breve { opacity: .55; cursor: default; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dicionário Visual AWP</h1>
+    <p>Selecione o Squad para acessar o dicionário de pacotes</p>
+  </header>
+  <div class="squads" id="squads"></div>
+  <script>
+    // Cards dos squads vêm do squads.json (enviar por FTP junto ao publicar).
+    fetch('squads.json', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(squads => {
+        const cont = document.getElementById('squads');
+        squads.forEach(s => {
+          const a = document.createElement('a');
+          a.className = 'card';
+          a.href = s.pasta + '/' + s.pasta + '.html';
+          a.innerHTML = '<div class="ico"></div><b></b><small>Dicionário de Pacotes</small>';
+          a.querySelector('.ico').textContent = s.icone || '📦';
+          a.querySelector('b').textContent = s.nome;
+          cont.appendChild(a);
+        });
+      })
+      .catch(e => console.warn('squads.json indisponível:', e));
+  </script>
+</body>
+</html>
