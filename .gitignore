@@ -1,7 +1,9 @@
-# Dados pesados (~890 MB) ficam fora do git — backup é via OneDrive
-data/*.parquet
-uploads/
+# Só a pasta deploy/ vai para o GitHub — o resto fica no OneDrive
+/*
+!/deploy
+!/.gitignore
 
+# Dentro de deploy/: banco e caches ficam fora
 __pycache__/
 *.pyc
 *.db
