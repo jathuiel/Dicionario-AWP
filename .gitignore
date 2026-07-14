@@ -1,9 +1,3 @@
-# Só a pasta deploy/ vai para o GitHub — o resto fica no OneDrive
-/*
-!/deploy
-!/.gitignore
-
-# Dentro de deploy/: banco e caches ficam fora
 __pycache__/
 *.pyc
 *.db
